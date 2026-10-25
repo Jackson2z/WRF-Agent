@@ -1,0 +1,54 @@
+# WRF-Agent workflow stages. The dashboard is one HTML page per stage, in this order.
+# owner: user | agent | compiler | automation  (who acts at this stage)
+# gate: what must be true to leave the stage
+# artefacts: files in the case directory that this stage produces (shown on the page)
+
+stages:
+  - id: request
+    title: Request
+    owner: user
+    summary: "The user states the simulation goal in plain language."
+    artefacts: [request.md]
+    gate: "request.md exists"
+  - id: decompose
+    title: Decompose
+    owner: agent
+    summary: "The experts deliberate here: independent proposals from three perspectives, a cross-review, and a synthesis that keeps the disagreements; the user picks one alternative as the draft."
+    artefacts: [draft.yaml, discussion.yaml]
+    gate: "discussion complete, an alternative selected, every required field has a value and a reason"
+  - id: review
+    title: Review
+    owner: user
+    summary: "The user reviews every design decision in the form and submits. This is where human judgement is needed: the compiler cannot check intent."
+    artefacts: [experiment.yaml]
+    gate: "user pressed Submit"
+  - id: compile
+    title: Compile
+    owner: compiler
+    summary: "The approved specification is compiled: derived fields are computed and every compile rule is checked. Errors send the case back to Review."
+    artefacts: [compile_report.yaml]
+    gate: "all compile rules pass"
+  - id: launch
+    title: Launch
+    owner: automation
+    summary: "Namelists and job scripts are written and the job is submitted to the HPC system."
+    artefacts: [namelist.wps, namelist.input, job script]
+    gate: "job accepted by the scheduler"
+  - id: monitor
+    title: Monitor
+    owner: automation
+    summary: "Periodic heartbeat: frames written, last frame time, state (running / stalled / finished / failed)."
+    artefacts: [heartbeat log]
+    gate: "job finished"
+  - id: verify
+    title: Verify
+    owner: automation
+    summary: "Outputs are checked: frame count, first/last time, output interval, data identity fingerprint."
+    artefacts: [verify report]
+    gate: "verify-dir PASS"
+  - id: restart
+    title: Restart
+    owner: automation
+    summary: "If a job stops early, it resumes from the latest restart file. Only run-control fields may change; design fields are locked by the compiler."
+    artefacts: [resume record]
+    gate: "only when needed"

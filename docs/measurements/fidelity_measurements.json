@@ -1,0 +1,908 @@
+{
+ "constraints": {
+  "valid_spec_verdict": "PASS",
+  "rule_kinds": 17,
+  "kinds": [
+   "cfl_timestep",
+   "domain_min_100",
+   "dx_chain",
+   "evert_min",
+   "evert_same",
+   "lagrange_coarse_input",
+   "land_cat_match",
+   "nest_divisible",
+   "nest_inside_parent",
+   "pbl_sfclay_compat",
+   "ratio_odd",
+   "rrtmg_o3input",
+   "urban_bep_pbl",
+   "urban_noah",
+   "urbparm_effective",
+   "vertical_grid_distinct",
+   "wps_wrf_same_source"
+  ],
+  "faults": 27,
+  "caught": 27,
+  "rows": [
+   {
+    "rule": "ratio_odd",
+    "test": "negative",
+    "fault": "even grid ratio",
+    "mutation": {
+     "wps:parent_grid_ratio": "1,2,2"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "nest_divisible",
+    "test": "negative",
+    "fault": "inner grid not divisible",
+    "mutation": {
+     "wps:e_we": "100,120,120"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "nest_inside_parent",
+    "test": "negative",
+    "fault": "nest outside parent",
+    "mutation": {
+     "wps:i_parent_start": "1,90,90"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "evert_same",
+    "test": "negative",
+    "fault": "vertical levels differ",
+    "mutation": {
+     "input:e_vert": "45,50,50"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "evert_min",
+    "test": "negative",
+    "fault": "too few vertical levels",
+    "mutation": {
+     "input:e_vert": "20,20,20"
+    },
+    "expected": "WARN",
+    "detected": "WARN",
+    "caught": true,
+    "case_verdict": "PASS",
+    "collateral": []
+   },
+   {
+    "rule": "domain_min_100",
+    "test": "negative",
+    "fault": "domain smaller than 100 cells",
+    "mutation": {
+     "wps:e_we": "50,50,50"
+    },
+    "expected": "WARN",
+    "detected": "WARN",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": [
+     "nest_divisible"
+    ]
+   },
+   {
+    "rule": "pbl_sfclay_compat",
+    "test": "negative",
+    "fault": "surface layer incompatible with PBL",
+    "mutation": {
+     "input:sf_sfclay_physics": "1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "shared option differs per domain",
+    "mutation": {
+     "input:sf_urban_physics": "0,0,3"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "inner domain neither d01 nor zero",
+    "mutation": {
+     "input:cu_physics": "1,16,0"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "urban_noah",
+    "test": "negative",
+    "fault": "urban scheme without an urban-capable LSM",
+    "mutation": {
+     "input:sf_urban_physics": "2",
+     "input:sf_surface_physics": "1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "cam_full_sbm",
+    "test": "negative",
+    "fault": "refused microphysics option",
+    "mutation": {
+     "input:mp_physics": "32"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "cam_build_dependent",
+    "test": "negative",
+    "fault": "option the build does not enable",
+    "mutation": {
+     "input:ra_lw_physics": "24"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "date_format",
+    "test": "negative",
+    "fault": "unparsable date",
+    "mutation": {
+     "wps:start_date": "2024/07/01"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "period_positive",
+    "test": "negative",
+    "fault": "end before start",
+    "mutation": {
+     "wps:end_date": "2024-06-30_00:00:00"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "required",
+    "test": "negative",
+    "fault": "a required decision removed",
+    "mutation": {
+     "wps:end_date": ""
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "per_domain_length",
+    "test": "negative",
+    "fault": "per-domain list of the wrong length",
+    "mutation": {
+     "wps:e_we": "100,121"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "urban_bep_pbl",
+    "test": "negative",
+    "fault": "multi-layer urban scheme under a PBL outside the rule's set",
+    "mutation": {
+     "input:bl_pbl_physics": "5"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": [
+     "pbl_sfclay_compat"
+    ]
+   },
+   {
+    "rule": "pbl_sfclay_compat",
+    "test": "negative",
+    "fault": "PBL without a compatibility entry",
+    "mutation": {
+     "input:bl_pbl_physics": "99"
+    },
+    "expected": "WARN",
+    "detected": "WARN",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": [
+     "urban_bep_pbl"
+    ]
+   },
+   {
+    "rule": "pbl_sfclay_compat",
+    "test": "negative",
+    "fault": "surface layer 10 without PBL 10",
+    "mutation": {
+     "input:sf_sfclay_physics": "10"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "cam_build_dependent",
+    "test": "negative",
+    "fault": "option decided by the compiler, not a build flag",
+    "mutation": {
+     "input:cu_physics": "3,0,0"
+    },
+    "expected": "DEFERRED",
+    "detected": "DEFERRED",
+    "caught": true,
+    "case_verdict": "PASS",
+    "collateral": []
+   },
+   {
+    "rule": "date_format",
+    "test": "negative",
+    "fault": "unparsable end date",
+    "mutation": {
+     "wps:end_date": "2024-07-09"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "microphysics differs per domain",
+    "mutation": {
+     "input:mp_physics": "6,8,8"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "inner PBL neither d01 nor zero",
+    "mutation": {
+     "input:bl_pbl_physics": "2,8,8"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "surface layer differs per domain",
+    "mutation": {
+     "input:sf_sfclay_physics": "2,1,1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "land surface differs per domain",
+    "mutation": {
+     "input:sf_surface_physics": "2,1,1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "long-wave radiation differs per domain",
+    "mutation": {
+     "input:ra_lw_physics": "4,1,1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   },
+   {
+    "rule": "domain_constraint",
+    "test": "negative",
+    "fault": "short-wave radiation differs per domain",
+    "mutation": {
+     "input:ra_sw_physics": "4,1,1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": []
+   }
+  ],
+  "positives": [
+   {
+    "rule": "cam_build_dependent",
+    "test": "positive",
+    "fault": "option the recorded build enables",
+    "mutation": {
+     "input:mp_physics": "30"
+    },
+    "expected": "PASS",
+    "detected": "PASS",
+    "caught": true,
+    "case_verdict": "PASS",
+    "collateral": []
+   }
+  ],
+  "inventory": {
+   "rules": 24,
+   "by_class": {
+    "enforcing": 17,
+    "informational": 4,
+    "deferred": 3
+   },
+   "enforcing_with_positive_and_negative": 17,
+   "enforcing_gaps": [],
+   "rows": [
+    {
+     "rule": "cam_build_dependent",
+     "statuses": [
+      "DEFERRED",
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "explicit positive test",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "cam_full_sbm",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "cfl_timestep",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": "the time step is derived as int(5*dx/1000) s and the rule tests <= 6*dx/1000 s, so no positive dx can fail it; it records the derivation rather than constrains the design"
+    },
+    {
+     "rule": "date_format",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "domain_constraint",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "domain_min_100",
+     "statuses": [
+      "PASS",
+      "WARN"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "dx_chain",
+     "statuses": [
+      "PASS"
+     ],
+     "class": "informational",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "evert_min",
+     "statuses": [
+      "PASS",
+      "WARN"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "evert_same",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "lagrange_coarse_input",
+     "statuses": [
+      "DEFERRED"
+     ],
+     "class": "deferred",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "land_cat_match",
+     "statuses": [
+      "DEFERRED"
+     ],
+     "class": "deferred",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "nest_divisible",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "nest_inside_parent",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "pbl_sfclay_compat",
+     "statuses": [
+      "FAIL",
+      "PASS",
+      "WARN"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "per_domain_length",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "period_positive",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "ratio_odd",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "required",
+     "statuses": [
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "rrtmg_o3input",
+     "statuses": [
+      "PASS"
+     ],
+     "class": "informational",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "urban_bep_pbl",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "urban_noah",
+     "statuses": [
+      "FAIL",
+      "PASS"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "urbparm_effective",
+     "statuses": [
+      "DEFERRED"
+     ],
+     "class": "deferred",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "vertical_grid_distinct",
+     "statuses": [
+      "PASS"
+     ],
+     "class": "informational",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "wps_wrf_same_source",
+     "statuses": [
+      "PASS"
+     ],
+     "class": "informational",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    }
+   ]
+  },
+  "domain_constraints": {
+   "declared": 8,
+   "negative_tested": [
+    "input:bl_pbl_physics",
+    "input:cu_physics",
+    "input:mp_physics",
+    "input:ra_lw_physics",
+    "input:ra_sw_physics",
+    "input:sf_sfclay_physics",
+    "input:sf_surface_physics",
+    "input:sf_urban_physics"
+   ],
+   "untested": []
+  },
+  "faults_without_collateral": 24,
+  "cfl_timestep_sweep": {
+   "dx_values": 8,
+   "statuses": [
+    "PASS"
+   ]
+  }
+ },
+ "approval": {
+  "edits": 5,
+  "invalidated": 5,
+  "controls": 3,
+  "controls_still_valid": 3,
+  "rows": [
+   {
+    "edit": "approved value changed in the specification",
+    "kind": "spec",
+    "control": false,
+    "approval_still_valid": false,
+    "detail": "plan changed or approval absent/invalidated; human Submit required"
+   },
+   {
+    "edit": "draft value changed after approval",
+    "kind": "draft",
+    "control": false,
+    "approval_still_valid": false,
+    "detail": "plan changed or approval absent/invalidated; human Submit required"
+   },
+   {
+    "edit": "request rewritten after approval",
+    "kind": "request",
+    "control": false,
+    "approval_still_valid": false,
+    "detail": "plan changed or approval absent/invalidated; human Submit required"
+   },
+   {
+    "edit": "discussion record replaced",
+    "kind": "discussion",
+    "control": false,
+    "approval_still_valid": false,
+    "detail": "plan changed or approval absent/invalidated; human Submit required"
+   },
+   {
+    "edit": "review form edited after approval",
+    "kind": "form",
+    "control": false,
+    "approval_still_valid": false,
+    "detail": "plan changed or approval absent/invalidated; human Submit required"
+   },
+   {
+    "edit": "no edit",
+    "kind": "none",
+    "control": true,
+    "approval_still_valid": true,
+    "detail": "human approval matches request, draft, discussion and specification"
+   },
+   {
+    "edit": "specification rewritten with identical bytes",
+    "kind": "touch",
+    "control": true,
+    "approval_still_valid": true,
+    "detail": "human approval matches request, draft, discussion and specification"
+   },
+   {
+    "edit": "specification re-serialised with the same content",
+    "kind": "reserialise",
+    "control": true,
+    "approval_still_valid": true,
+    "detail": "human approval matches request, draft, discussion and specification"
+   }
+  ]
+ },
+ "generation": {
+  "verdict": "COMPLETE",
+  "files": {
+   "namelist.wps": {
+    "sha256": "c40203a2069172bf87ae071cd36925a31cec13b89b019435b0d7652e9964f5a7",
+    "identical": true
+   },
+   "namelist.input": {
+    "sha256": "a4574f0d4014a77d939515f98efca0d33eea6fc714eb7b8279a8a878522dae1c",
+    "identical": true
+   }
+  },
+  "identical": true,
+  "params_emitted": 111,
+  "provenance_complete": true,
+  "unlabelled": [],
+  "missing_required": [],
+  "unsupported_in_build": []
+ },
+ "edit_provenance": {
+  "agent_value_retained": true,
+  "edit_marked": true,
+  "value_is_the_person_s_choice": true,
+  "changed_listed_in_spec": true,
+  "agent_reason_survives": true
+ },
+ "startup_checks": {
+  "cases": 3,
+  "ok": 3,
+  "rows": [
+   {
+    "case": "valid specification",
+    "mutation": {},
+    "expected": {
+     "refusals": [],
+     "rewrites_of_written_values": []
+    },
+    "got": {
+     "refusals": [],
+     "rewrites_of_written_values": []
+    },
+    "ok": true
+   },
+   {
+    "case": "urban scheme only on the innermost domain",
+    "mutation": {
+     "input:sf_urban_physics": "0,0,3"
+    },
+    "expected": {
+     "refusals": [],
+     "rewrites_of_written_values": [
+      "sf_urban_physics"
+     ]
+    },
+    "got": {
+     "refusals": [],
+     "rewrites_of_written_values": [
+      "sf_urban_physics"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "case": "microphysics refused by the model",
+    "mutation": {
+     "input:mp_physics": "32"
+    },
+    "expected": {
+     "refusals": [
+      2586
+     ],
+     "rewrites_of_written_values": []
+    },
+    "got": {
+     "refusals": [
+      2586
+     ],
+     "rewrites_of_written_values": []
+    },
+    "ok": true
+   }
+  ],
+  "coverage": {
+   "compiled_out_for_build": 22,
+   "refuse": {
+    "in_build": 85,
+    "decidable": 78,
+    "involve_S": 37,
+    "involve_S_decidable": 37
+   },
+   "rewrite": {
+    "in_build": 268,
+    "decidable": 241,
+    "involve_S": 114,
+    "involve_S_decidable": 95,
+    "replace_S": 21,
+    "replace_S_decidable": 20
+   },
+   "undecidable_reasons": {
+    "function call": 18,
+    "new value: function call": 10,
+    "value of <var> unknown": 3,
+    "identifier EDMFMAX": 1,
+    "identifier lon_extent_is_global": 1,
+    "identifier oops": 1
+   }
+  }
+ }
+}

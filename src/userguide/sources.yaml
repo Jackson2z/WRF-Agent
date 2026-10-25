@@ -1,0 +1,35 @@
+# Upstream sources (data-driven: a new WRF version changes this file, not the code)
+# fetch downloads them into references/upstream/wrf-<version>/ and writes MANIFEST.yaml (url / sha256 / fetch time)
+version: "4.6.1"
+wps_tag: "v4.6.0"
+# Build profile: decides the namelist variable set and the build-dependent rules
+# (references/upstream/wrf-<version>/builds/<label>/)
+default_build: "wrf461-dmpar"          # WPS 4.6.0 pairs with WRF 4.6.x (WPS has no 4.6.1 tag)
+
+sources:
+  # ---- machine layer: Registry (field type / default / namelist group / per-domain) ----
+  registry:
+    base: "https://raw.githubusercontent.com/wrf-model/WRF/v{version}/Registry/"
+    entry: "Registry.EM"            # parse entry point; includes are followed recursively
+    # every Registry file is listed through the GitHub tree API (locked to the tag)
+    tree_api: "https://api.github.com/repos/wrf-model/WRF/git/trees/v{version}?recursive=1"
+    prefix: "Registry/"
+  # ---- description layer: README.namelist (bound to the tag; main source for plain-language mapping) ----
+  readme_namelist:
+    url: "https://raw.githubusercontent.com/wrf-model/WRF/v{version}/run/README.namelist"
+  # ---- WPS fields ----
+  wps_all_options:
+    url: "https://raw.githubusercontent.com/wrf-model/WPS/{wps_tag}/namelist.wps.all_options"
+  wps_default:
+    url: "https://raw.githubusercontent.com/wrf-model/WPS/{wps_tag}/namelist.wps"
+  # ---- narrative layer: Users' Guide (the website is the latest version, not locked -> fetch date recorded) ----
+  users_guide:
+    base: "https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/"
+    pages:
+      - namelist_variables.html
+      - wps.html
+      - physics.html
+      - running_wrf.html
+      - initialization.html
+      - dynamics.html
+      - output.html

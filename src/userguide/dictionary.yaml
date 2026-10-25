@@ -1,0 +1,221 @@
+# Dictionary: the single source of every human-readable string in the parameter form (English base; add a language by dropping dictionary.<lang>.yaml next to this file (overlay wins, no code changes)).
+# Sections:
+#   ui      interface strings ({version}, {n} are placeholders)
+#   groups  group titles (ids from field_map.yaml)
+#   rules   compile-rule descriptions (ids shared with field_map.yaml and the compiler)
+#   sources non-field derivation sources (e.g. forcing_dataset)
+#   fields  <file>:<field> -> label / question / note / options{value: label}
+# Option labels may be omitted: the renderer falls back to the Users' Guide wording.
+language: en
+ui:
+  title: WRF {version} parameter setup
+  subtitle: Generated from the WRF Registry, Users' Guide and README.namelist
+  count_design: decided by you
+  count_derived: derived by the compiler
+  count_runtime: runtime only
+  count_unmapped: not yet mapped
+  tab_form: Experiment setup
+  tab_all: All parameters
+  tab_out: Export YAML
+  search: Search name or description…
+  col_field: Field
+  col_where: File / block
+  col_class: Class
+  col_default: Default
+  col_desc: Description (Users' Guide)
+  per_domain: per domain
+  derived_from: derived from
+  choose: (choose)
+  per_domain_ph: one value per domain, comma-separated, e.g. 1,0,0
+  suggestion: Agent suggestion
+  options: Options
+  checked: Checked automatically when compiling
+  official: Official description
+  source: Source
+  reg_default: Registry default
+  unit: unit
+  readme_line: README.namelist line {n}
+  out_intro: Experiment YAML generated from the form. WRF-Agent compiles it into the namelists.
+  download: Download experiment.yaml
+  copy: Copy
+  missing: not filled yet
+  no_design: No design fields in field_map yet; browse “All parameters”.
+  class_design: design
+  class_derived: derived
+  class_runtime: runtime
+  class_unmapped: unmapped
+  submit: Submit for compilation
+  submitting: Submitting…
+  submit_offline: 'No dashboard server is running, so the YAML was downloaded instead. Start it with: python3 -m src.userguide serve <case>'
+  stage: Stage
+  owner: Done by
+  gate: Leaves this stage when
+  artefacts: Produces
+  status_done: done
+  status_current: current
+  status_pending: pending
+  status_failed: failed
+  back_review: Back to Review
+  proceed: Proceed
+  verdict: Verdict
+  col_rule: Rule
+  col_status: Status
+  col_fields: Fields
+  col_detail: Detail
+  derived_title: Fields derived by the compiler
+  rules_title: Compile rules
+  approved: Approved specification
+  not_reached: This stage has not been reached yet.
+  history: History
+  request_title: Request
+  saved: Saved
+  saving: Saving…
+  edited_by_you: Edited by you
+  collapse: Collapse
+  expand: Agent
+  toc: Fields
+  emit: Compile to namelists
+  emit_intro: Emit namelist.wps / namelist.input from the approved specification.
+  emit_verdict: Emit
+  emit_again: Re-generate namelists
+  prepare: Prepare run directory
+  survey: Survey
+  verify_run: Verify
+  restart_from: Build restart overlay
+  run_dir_label: Run directory
+  survey_title: Survey
+  verify_title: Frame-level verification
+groups:
+  time: Simulation period and restarts
+  domain: Domains and nesting
+  physics: Physics
+  urban: Urban
+  output: Output
+rules:
+  dx_chain: Nest dx = parent dx / parent_grid_ratio
+  wps_wrf_same_source: WPS and WRF values are generated from one source, so they cannot disagree
+  ratio_odd: Nesting ratio should be odd (3 or 5); even ratios require feedback=0
+  nest_divisible: For nests, (e_we−1) and (e_sn−1) must be divisible by parent_grid_ratio
+  nest_inside_parent: Each nest must lie entirely inside its parent
+  domain_min_100: Domains should have at least ~100 grid points per side (UG FAQ)
+  evert_same: e_vert must be the same for all domains
+  evert_min: At least 35 vertical levels (knowledge base domain_rules)
+  cfl_timestep: time_step ≤ 6·dx[km] (default 5·dx)
+  vertical_grid_distinct: Model levels (e_vert) and input levels (num_metgrid_levels) are different quantities; real.exe interpolates the input onto the model grid, so they need not match
+  lagrange_coarse_input: With 20 or fewer input levels wrf.exe switches vertical interpolation to linear (lagrange_order = 1) by itself
+  land_cat_match: num_land_cat must match the land-use data (MODIS 21 / USGS 24 / NLCD 40)
+  urban_bep_pbl: BEP/BEM urban schemes work only with PBL 1 (YSU), 2 (MYJ) or 8 (BouLac)
+  pbl_sfclay_compat: 'Surface layer must match the PBL scheme: YSU→1/91, MYJ→2, BouLac→1/91'
+  urban_noah: The urban canopy model requires the Noah (2) or Noah-MP (4) land surface model
+  rrtmg_o3input: ra_lw_physics=4 (RRTMG) requires o3input=2
+  urbparm_effective: Urban land categories must exist and URBPARM.TBL must take effect, otherwise the urban model does nothing
+  required: Every design field must have a value
+  per_domain_length: Per-domain fields need one value per domain (or one value for all)
+  same_all_domains: The Users' Guide says this option should be the same for all domains
+  date_format: Dates use YYYY-MM-DD_hh:mm:ss (UTC)
+  period_positive: The end time must be after the start time
+sources:
+  forcing_dataset: forcing dataset (e.g. ERA5 3600 s, GFS 10800 s)
+  landuse_dataset: land-use dataset
+  template_default: template default
+fields:
+  wps:start_date:
+    label: Start time (UTC)
+    question: When does the simulation start? Use UTC and include spin-up.
+  wps:end_date:
+    label: End time (UTC)
+    question: When does the simulation end?
+  input:restart_interval:
+    label: Restart interval (min)
+    question: How often should restart points be saved? Interrupted jobs resume from the latest one.
+    note: Long runs commonly use 1440 (daily).
+  input:restart:
+    note: Set by the resume workflow (wrf_case resume), not by the user.
+  wps:max_dom:
+    label: Number of domains
+    question: How many nested domains? More nests give a finer inner grid but cost more.
+  wps:ref_lat:
+    label: Centre latitude
+    question: Where is the study area centred (latitude)?
+  wps:ref_lon:
+    label: Centre longitude
+    question: Where is the study area centred (longitude)?
+  wps:map_proj:
+    label: Map projection
+    question: Which map projection? Mercator suits low latitudes, Lambert mid-latitudes.
+    options:
+      lambert: Lambert conformal (mid-latitudes)
+      mercator: Mercator (low latitudes)
+      polar: Polar stereographic (high latitudes)
+      lat-lon: Latitude–longitude grid
+  wps:dx:
+    label: Outer grid spacing (m)
+    question: How large is the outermost grid cell (m)? Inner nests follow from the nesting ratio.
+  wps:parent_grid_ratio:
+    label: Nesting ratio
+    question: How many times finer is each domain than its parent? (one value per domain)
+  wps:e_we:
+    label: West–east grid points
+    question: How many grid points west–east in each domain?
+  wps:e_sn:
+    label: South–north grid points
+    question: How many grid points south–north in each domain?
+  wps:i_parent_start:
+    label: Nest start in parent (x)
+    question: At which parent grid point (x) does each nest's lower-left corner sit?
+  wps:j_parent_start:
+    label: Nest start in parent (y)
+    question: At which parent grid point (y) does each nest's lower-left corner sit?
+  input:e_vert:
+    label: Vertical levels
+    question: How many vertical levels? All domains must use the same number.
+  input:mp_physics:
+    label: Microphysics
+    question: Which microphysics scheme? (how clouds and precipitation are computed)
+  input:bl_pbl_physics:
+    label: Planetary boundary layer
+    question: Which PBL scheme? (near-surface turbulent mixing)
+  input:sf_sfclay_physics:
+    label: Surface layer
+    question: Which surface-layer scheme? (must match the PBL scheme)
+  input:sf_surface_physics:
+    label: Land surface model
+    question: Which land surface model?
+  input:ra_lw_physics:
+    label: Longwave radiation
+    question: Which longwave radiation scheme?
+  input:ra_sw_physics:
+    label: Shortwave radiation
+    question: Which shortwave radiation scheme?
+  input:cu_physics:
+    label: Cumulus (per domain)
+    question: Is cumulus parameterisation needed? Usually off below ~4 km; 4–10 km is the grey zone where scale-aware schemes are an option.
+  input:sf_urban_physics:
+    label: Urban canopy model (per domain)
+    question: Should buildings and the city affect air temperature? Which urban model (including building energy use)?
+    options:
+      '0': No urban model
+      '1': Single-layer urban canopy (UCM)
+      '2': Multi-layer building effects (BEP)
+      '3': Multi-layer building effects + building energy (BEP+BEM)
+  input:use_wudapt_lcz:
+    label: Urban classification
+    question: Use the traditional 3 urban classes or WUDAPT Local Climate Zones (11 classes)?
+    options:
+      '0': Traditional urban classes (31–33)
+      '1': WUDAPT LCZ classes (51–61)
+  input:history_interval:
+    label: Output interval (min, per domain)
+    question: How often (minutes) should a frame be written?
+  input:frames_per_outfile:
+    label: Frames per output file
+    question: How many frames per wrfout file? (controls file size)
+  wps:stand_lon:
+    label: Grid orientation longitude
+    question: Which longitude is the grid parallel to (stand_lon)?
+  wps:truelat1:
+    label: True latitude 1
+    question: First true latitude for the projection (Lambert / polar).
+  wps:truelat2:
+    label: True latitude 2
+    question: Second true latitude (Lambert only).

@@ -1,0 +1,146 @@
+{
+ "definitions": {
+  "file": "docs/measurements/audit_definitions.yaml",
+  "sha256": "2a0920adde7a6276b8cb242e57ff0cf7f94afaab44b6bb7a199a0e7e3cd5d33a",
+  "status": "frozen",
+  "study_defining_size": 28,
+  "study_defining_drift": {
+   "only_in_definitions": [],
+   "only_in_field_map": []
+  }
+ },
+ "inputs": {
+  "ledger": {
+   "file": "references/upstream/wrf-4.6.1/check_a_mundo.json",
+   "sha256": "296d57323d297878e8af38e2b459bde0aa470d609f609bf21c5141e5ce17a605"
+  }
+ },
+ "audit": {
+  "release": "4.6.1",
+  "source": "wrf-model/WRF@v4.6.1:share/module_check_a_mundo.F",
+  "source_sha256": "2d6d4eb1f9183b4a4157f32de2ba34753bc4c0c10c380ad2ba4cfb524885b038",
+  "refusals": {
+   "total": 97,
+   "printed_at_default_debug_level": 95,
+   "printed_only_with_debug": 0,
+   "not_printed": 2,
+   "printed_at_default_upper_bound": 97,
+   "message_text_present": 89,
+   "involve_study_defining": 41,
+   "involve_study_defining_printed_at_default": 41
+  },
+  "rewrites": {
+   "total": 278,
+   "printed_at_default_debug_level": 21,
+   "printed_only_with_debug": 73,
+   "not_printed": 184,
+   "printed_at_default_upper_bound": 76,
+   "message_text_present": 47,
+   "distinct_targets": 182,
+   "involve_study_defining": 115,
+   "involve_study_defining_distinct_targets": 58,
+   "involve_study_defining_printed_at_default": 19,
+   "replace_study_defining": 21,
+   "replace_study_defining_distinct_targets": [
+    "bl_pbl_physics",
+    "cu_physics",
+    "dx",
+    "mp_physics",
+    "ra_lw_physics",
+    "ra_sw_physics",
+    "sf_sfclay_physics",
+    "sf_surface_physics",
+    "sf_urban_physics"
+   ],
+   "replace_study_defining_printed_at_default": 4,
+   "replace_study_defining_printed_at_default_upper_bound": 11
+  }
+ },
+ "build": {
+  "label": "wrf461-dmpar",
+  "accepted_variables": 2166,
+  "rewrite_targets_accepted": 132,
+  "rewrite_targets_not_in_build": 50,
+  "fraction": 0.0609
+ },
+ "drift": {
+  "series": [
+   {
+    "release": "4.4.2",
+    "refusals": 95,
+    "rewrites": 246,
+    "source": "wrf-model/WRF@v4.4.2:share/module_check_a_mundo.F",
+    "source_sha256": "7c8dc214f7a55e5c80b085dc58eba45a96a1d7dae66ca75ca074f5394a94a053"
+   },
+   {
+    "release": "4.5.1",
+    "refusals": 95,
+    "rewrites": 246,
+    "source": "wrf-model/WRF@v4.5.1:share/module_check_a_mundo.F",
+    "source_sha256": "f31b16278f8c9313e75f5eb701542b275e1fecfc0348efee7538ad2160050ff0"
+   },
+   {
+    "release": "4.6.1",
+    "refusals": 97,
+    "rewrites": 278,
+    "source": "wrf-model/WRF@v4.6.1:share/module_check_a_mundo.F",
+    "source_sha256": "2d6d4eb1f9183b4a4157f32de2ba34753bc4c0c10c380ad2ba4cfb524885b038"
+   },
+   {
+    "release": "4.7.1",
+    "refusals": 97,
+    "rewrites": 281,
+    "source": "wrf-model/WRF@v4.7.1:share/module_check_a_mundo.F",
+    "source_sha256": "c66b3ef802da58e2a453b62fc00a04542c66ea93d752aa49bbd981fe00d40784"
+   }
+  ],
+  "steps": [
+   {
+    "from": "4.4.2",
+    "to": "4.5.1",
+    "added": {
+     "refuse": 2,
+     "rewrite": 6
+    },
+    "removed": {
+     "refuse": 2,
+     "rewrite": 6
+    }
+   },
+   {
+    "from": "4.5.1",
+    "to": "4.6.1",
+    "added": {
+     "refuse": 2,
+     "rewrite": 33
+    },
+    "removed": {
+     "refuse": 0,
+     "rewrite": 1
+    }
+   },
+   {
+    "from": "4.6.1",
+    "to": "4.7.1",
+    "added": {
+     "refuse": 2,
+     "rewrite": 17
+    },
+    "removed": {
+     "refuse": 2,
+     "rewrite": 14
+    }
+   }
+  ]
+ },
+ "coverage": {
+  "cited_lines": 16,
+  "cited_lines_not_in_ledger": [],
+  "refusals_encoded": 13,
+  "rewrites_encoded": 3,
+  "study_defining_refusals_encoded": 13,
+  "study_defining_rewrites_encoded": 2,
+  "study_defining_replacements_encoded": 2
+ },
+ "generated_by": "src/userguide/measure_audit.py"
+}

@@ -1,0 +1,31 @@
+# Agent draft (stage 2: Decompose). Every design field has a proposed value and the reason for it.
+# The user reviews these in the dashboard (stage 3) and submits.
+wrf_version: "4.6.1"
+request_summary: "Urban heat in Singapore, July 2024: roof and wall albedo sensitivity with BEP+BEM"
+design:
+  "wps:start_date":         {value: "2024-07-01_00:00:00", reason: "Eight-day July 2024 window; first 48 h are spin-up"}
+  "wps:end_date":           {value: "2024-07-09_00:00:00", reason: "Six analysis days after spin-up"}
+  "input:restart_interval": {value: 1440, reason: "One restart point per day so an interrupted job loses at most a day"}
+  "wps:max_dom":            {value: 3, reason: "9 / 3 / 1 km nesting down to the city scale"}
+  "wps:ref_lat":            {value: 1.35, reason: "Centre of Singapore"}
+  "wps:ref_lon":            {value: 103.82, reason: "Centre of Singapore"}
+  "wps:map_proj":           {value: "mercator", reason: "Near-equatorial domain"}
+  "wps:stand_lon":          {value: 103.8, reason: "Grid parallel to Singapore longitude"}
+  "wps:dx":                 {value: 9000, reason: "9 km outer domain"}
+  "wps:parent_grid_ratio":  {value: "1,3,3", reason: "Odd ratio 3 gives 9 → 3 → 1 km"}
+  "wps:e_we":               {value: "100,121,151", reason: "(e_we−1) divisible by 3 for both nests; every domain ≥ 100 points"}
+  "wps:e_sn":               {value: "100,121,151", reason: "Same as e_we"}
+  "wps:i_parent_start":     {value: "1,34,41", reason: "Nests centred on the island"}
+  "wps:j_parent_start":     {value: "1,34,41", reason: "Nests centred on the island"}
+  "input:e_vert":           {value: 51, reason: "51 levels resolve the urban boundary layer"}
+  "input:mp_physics":       {value: 8, reason: "Thompson; knowledge-base default"}
+  "input:bl_pbl_physics":   {value: 2, reason: "MYJ; BEP+BEM requires PBL 1, 2 or 8"}
+  "input:sf_sfclay_physics": {value: 2, reason: "MYJ PBL requires surface layer 2"}
+  "input:sf_surface_physics": {value: 2, reason: "Noah is required by the urban canopy model"}
+  "input:ra_lw_physics":    {value: 4, reason: "RRTMG"}
+  "input:ra_sw_physics":    {value: 4, reason: "RRTMG"}
+  "input:cu_physics":       {value: "3,0,0", reason: "Scale-aware cumulus at 9 km (grey zone); off at 3 and 1 km"}
+  "input:sf_urban_physics": {value: "3,3,3", reason: "BEP+BEM. WRF 4.6.1 forces one urban option on all domains (module_check_a_mundo.F:1061 resets every domain to the innermost value, silently at debug_level 0), so 0,0,3 would also run BEP on d01/d02; state it explicitly"}
+  "input:use_wudapt_lcz":   {value: 0, reason: "Traditional urban classes"}
+  "input:history_interval": {value: "60,60,60", reason: "Hourly output"}
+  "input:frames_per_outfile": {value: "24,24,24", reason: "One file per day"}

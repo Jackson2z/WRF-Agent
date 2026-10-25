@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "${{ matrix.python }}"}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[test]"
+      - name: parameter registry from the pinned snapshot (offline)
+        run: python -m src.userguide parse --build wrf461-dmpar
+      - name: measured numbers reproduce
+        run: |
+          python -m src.userguide.measure_audit --out /tmp/m
+          python -m src.userguide.measure_fidelity --out /tmp/m
+      - run: python -m pytest -q

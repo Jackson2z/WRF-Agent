@@ -1,0 +1,31 @@
+label: wrf461-dmpar
+wrf_version: 4.6.1
+registry_entry: Registry.EM
+configure_wrf:
+  sha256: 01c95acca80e1fa923e117fb37fe1ade0ee075ffede6f8ab4a09c78ed7a3e061
+  WRF_CHEM: 0
+  defines:
+  - BUILD_RRTMG_FAST=0
+  - BUILD_RRTMK=0
+  - BUILD_SBM_FAST=1
+  - DM_PARALLEL
+  - NETCDF
+  - USE_NETCDF4_FEATURES
+  - WRF_USE_CLM
+  - _OPENMP
+  - GRIB1
+  - INTIO
+namelist_statements:
+  file: namelist_statements.inc
+  sha256: 28f611e49158941356824712a99a3f8164eb6635812bae23592dcc31bbac0107
+pristine_source:
+  release: wrf-model/WRF v4.6.1 release tarball
+  sha256: 19bbd9977da9496cc15f5bb31aab8dc27045dc523968dded66cfd0f4746c40c4
+  note: identical to GitHub v4.6.1 (phys/module_sf_bem.F sha256 7bc761ee... matches
+    raw.githubusercontent v4.6.1)
+local_modifications:
+- file: phys/module_sf_bem.F
+  line: 896
+  change: 'PV efficiency: min(1.,1.-0.005*(tpv-T)) -> (1.-0.005*(tpv-T))'
+  edited: '2026-09-11'
+  namelist_effect: none

@@ -1,0 +1,102 @@
+# The case lifecycle as an executable state machine (flow/dsl.py loads and validates this file).
+#
+# Differences from workflow.yaml (which the dashboard renders): every gate here is *executable*
+# (artifact / python / command / all), every automatic stage names an action, and each stage declares where
+# its outcomes go. workflow.yaml stays the human-readable view; tests/test_flow_dsl.py asserts the two files
+# do not drift apart.
+#
+# owners: user (a person acts) | agent (the LLM proposes) | compiler (deterministic rules) | automation (us)
+# gate modes: pass -> take on.pass | fail -> retry up to max_attempts, then take on.fail | wait -> stop,
+#             the runner reports waiting_external and charges no attempt.
+
+version: 1
+start: request
+
+stages:
+  - id: request
+    title: Request
+    owner: user
+    summary: "The user states the simulation goal in plain language."
+    gate: {kind: artifact, files: [request.md]}
+    artifacts: [request.md]
+    advance_on_artifact: true      # writing the request *is* the user's act; there is nothing to approve here
+    "on": {pass: decompose}
+
+  - id: decompose
+    title: Decompose
+    owner: agent
+    summary: "The experts deliberate here: independent proposals, cross-review, a synthesis with dissent, and the
+      human selection of one alternative as draft.yaml."
+    gate: {kind: python, target: "actions:gate_draft_ready"}
+    artifacts: [draft.yaml, board.jsonl]
+    "on": {pass: review, fail: decompose}
+    max_attempts: 3
+
+  - id: review
+    title: Review
+    owner: user
+    summary: "The user reviews the 28 design decisions and submits; the compiler cannot check intent."
+    gate: {kind: python, target: "actions:gate_spec_approved"}
+    artifacts: [experiment.yaml]
+    "on": {pass: compile}
+
+  - id: compile
+    title: Compile
+    owner: compiler
+    action: "actions:compile_case"
+    summary: "Derived fields are computed and all compile rules run. A FAIL rule sends the case back to Review."
+    gate: {kind: python, target: "actions:gate_compile_pass"}
+    artifacts: [compile_report.yaml]
+    "on": {pass: launch, fail: review}
+    max_attempts: 1
+
+  - id: launch
+    title: Launch
+    owner: automation
+    action: "actions:prepare_launch"
+    summary: "Namelists are emitted with provenance, and the run directory is prepared. Submission stays a user action."
+    gate: {kind: python, target: "actions:gate_launch_prepared"}
+    artifacts: [build/emit_manifest.yaml, run/run_manifest.yaml]
+    "on": {pass: monitor, fail: compile}
+    max_attempts: 1
+
+  - id: monitor
+    title: Monitor
+    owner: automation
+    summary: "Frame-level heartbeat: frames written, newest file age, rsl status. A stalled run goes to Restart."
+    gate: {kind: python, target: "actions:gate_run_finished"}
+    artifacts: [run]
+    "on": {pass: verify, fail: restart}
+    max_attempts: 1
+
+  - id: verify
+    title: Verify
+    owner: automation
+    action: "actions:verify_case"
+    summary: "Frame-level acceptance: expected count, window endpoints, no gaps, rsl SUCCESS."
+    gate: {kind: python, target: "actions:gate_verify_pass"}
+    artifacts: [verify_report.yaml]
+    "on": {pass: done, fail: restart}
+    max_attempts: 1
+
+  - id: restart
+    title: Restart
+    owner: automation
+    action: "actions:restart_case"
+    summary: "Restart is recompilation from the latest wrfrst: run-control keys only, design fields asserted unchanged."
+    gate: {kind: python, target: "actions:gate_restart_done"}
+    artifacts: [restart_record.yaml, build/restart]
+    "on": {pass: launch, fail: failed}
+    max_attempts: 1
+
+  - id: done
+    title: Done
+    owner: automation
+    terminal: true
+    summary: "The case closed: outputs verified, identity recorded."
+
+  - id: failed
+    title: Failed
+    owner: automation
+    terminal: true
+    summary: "Execution failed; human intervention required."

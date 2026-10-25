@@ -1,0 +1,360 @@
+version: 4.6.1
+groups:
+- time
+- domain
+- physics
+- urban
+- output
+fields:
+  wps:start_date:
+    class: design
+    group: time
+    widget: text
+    placeholder: 2024-07-01_00:00:00
+  wps:end_date:
+    class: design
+    group: time
+    widget: text
+    placeholder: 2024-07-09_00:00:00
+  input:restart_interval:
+    class: design
+    group: time
+    unit: min
+  input:restart:
+    class: runtime
+  input:start_year:
+    class: derived
+    derive_from:
+    - wps:start_date
+  input:start_month:
+    class: derived
+    derive_from:
+    - wps:start_date
+  input:start_day:
+    class: derived
+    derive_from:
+    - wps:start_date
+  input:start_hour:
+    class: derived
+    derive_from:
+    - wps:start_date
+  input:end_year:
+    class: derived
+    derive_from:
+    - wps:end_date
+  input:end_month:
+    class: derived
+    derive_from:
+    - wps:end_date
+  input:end_day:
+    class: derived
+    derive_from:
+    - wps:end_date
+  input:end_hour:
+    class: derived
+    derive_from:
+    - wps:end_date
+  input:run_days:
+    class: derived
+    derive_from:
+    - wps:start_date
+    - wps:end_date
+  input:run_hours:
+    class: derived
+    derive_from:
+    - wps:start_date
+    - wps:end_date
+  input:interval_seconds:
+    class: derived
+    derive_from:
+    - forcing_dataset
+  wps:interval_seconds:
+    class: derived
+    derive_from:
+    - forcing_dataset
+  wps:max_dom:
+    class: design
+    group: domain
+    widget: number
+  wps:ref_lat:
+    class: design
+    group: domain
+    widget: number
+  wps:ref_lon:
+    class: design
+    group: domain
+    widget: number
+  wps:map_proj:
+    class: design
+    group: domain
+    values:
+    - lambert
+    - mercator
+    - polar
+    - lat-lon
+  wps:dx:
+    class: design
+    group: domain
+    unit: m
+    rules:
+    - dx_chain
+    - wps_wrf_same_source
+  wps:parent_grid_ratio:
+    class: design
+    group: domain
+    per_domain_hint: true
+    rules:
+    - ratio_odd
+  wps:e_we:
+    class: design
+    group: domain
+    per_domain_hint: true
+    rules:
+    - nest_divisible
+    - nest_inside_parent
+    - domain_min_100
+  wps:e_sn:
+    class: design
+    group: domain
+    per_domain_hint: true
+    rules:
+    - nest_divisible
+    - nest_inside_parent
+  wps:i_parent_start:
+    class: design
+    group: domain
+    per_domain_hint: true
+    rules:
+    - nest_inside_parent
+  wps:j_parent_start:
+    class: design
+    group: domain
+    per_domain_hint: true
+    rules:
+    - nest_inside_parent
+  input:e_vert:
+    class: design
+    group: domain
+    rules:
+    - evert_same
+    - evert_min
+  input:time_step:
+    class: derived
+    derive_from:
+    - wps:dx
+    rules:
+    - cfl_timestep
+  input:parent_time_step_ratio:
+    class: derived
+    derive_from:
+    - wps:parent_grid_ratio
+  input:max_dom:
+    class: derived
+    derive_from:
+    - wps:max_dom
+  input:e_we:
+    class: derived
+    derive_from:
+    - wps:e_we
+  input:e_sn:
+    class: derived
+    derive_from:
+    - wps:e_sn
+  input:dx:
+    class: derived
+    derive_from:
+    - wps:dx
+    - wps:parent_grid_ratio
+  input:dy:
+    class: derived
+    derive_from:
+    - wps:dx
+    - wps:parent_grid_ratio
+  input:parent_grid_ratio:
+    class: derived
+    derive_from:
+    - wps:parent_grid_ratio
+  input:i_parent_start:
+    class: derived
+    derive_from:
+    - wps:i_parent_start
+  input:j_parent_start:
+    class: derived
+    derive_from:
+    - wps:j_parent_start
+  input:parent_id:
+    class: derived
+    derive_from:
+    - wps:max_dom
+  input:grid_id:
+    class: derived
+    derive_from:
+    - wps:max_dom
+  wps:dy:
+    class: derived
+    derive_from:
+    - wps:dx
+  wps:parent_id:
+    class: derived
+    derive_from:
+    - wps:max_dom
+  input:num_metgrid_levels:
+    class: derived
+    derive_from:
+    - forcing_dataset
+    rules:
+    - vertical_grid_distinct
+    - lagrange_coarse_input
+  input:num_metgrid_soil_levels:
+    class: derived
+    derive_from:
+    - forcing_dataset
+  input:num_land_cat:
+    class: derived
+    derive_from:
+    - landuse_dataset
+    rules:
+    - land_cat_match
+  input:mp_physics:
+    class: design
+    group: physics
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe sets every domain to the innermost value"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:789"
+  input:bl_pbl_physics:
+    class: design
+    group: physics
+    rules:
+    - urban_bep_pbl
+    constraint:
+      kind: equal_or_zero
+      because: "inner domains must repeat d01 or switch the scheme off (0)"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:895"
+  input:sf_sfclay_physics:
+    class: design
+    group: physics
+    rules:
+    - pbl_sfclay_compat
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe refuses when the domains differ"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:768"
+  input:sf_surface_physics:
+    class: design
+    group: physics
+    rules:
+    - urban_noah
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe refuses when the domains differ"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:751"
+  input:ra_lw_physics:
+    class: design
+    group: physics
+    rules:
+    - rrtmg_o3input
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe refuses when the domains differ"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:853"
+  input:ra_sw_physics:
+    class: design
+    group: physics
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe refuses when the domains differ"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:865"
+  input:cu_physics:
+    class: design
+    group: physics
+    per_domain_hint: true
+    constraint:
+      kind: equal_or_zero
+      because: "inner domains must repeat d01 or switch the scheme off (0)"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:928"
+  input:radt:
+    class: derived
+    derive_from:
+    - wps:dx
+  input:cudt:
+    class: derived
+    derive_from:
+    - template_default
+  input:o3input:
+    class: derived
+    derive_from:
+    - input:ra_lw_physics
+    rules:
+    - rrtmg_o3input
+  input:sf_urban_physics:
+    class: design
+    group: urban
+    rules:
+    - urban_noah
+    - urban_bep_pbl
+    - urbparm_effective
+    constraint:
+      kind: same_all_domains
+      because: "wrf.exe sets every domain to the innermost value; the urban scheme cannot be switched off on outer domains (upstream commit 5c83035351)"
+      source: "wrf-4.6.1/share/module_check_a_mundo.F:1061"
+  input:use_wudapt_lcz:
+    class: design
+    group: urban
+    show_if:
+      input:sf_urban_physics:
+      - '1'
+      - '2'
+      - '3'
+  input:num_urban_hi:
+    class: derived
+    derive_from:
+    - input:sf_urban_physics
+  input:history_interval:
+    class: design
+    group: output
+    per_domain_hint: true
+    unit: min
+  input:frames_per_outfile:
+    class: design
+    group: output
+    per_domain_hint: true
+  input:nproc_x:
+    class: runtime
+  input:nproc_y:
+    class: runtime
+  input:debug_level:
+    class: runtime
+  input:io_form_history:
+    class: runtime
+  input:io_form_restart:
+    class: runtime
+  input:io_form_input:
+    class: runtime
+  input:io_form_boundary:
+    class: runtime
+  wps:io_form_geogrid:
+    class: runtime
+  wps:debug_level:
+    class: runtime
+  wps:wrf_core:
+    class: runtime
+  wps:stand_lon:
+    class: design
+    group: domain
+    widget: number
+  wps:truelat1:
+    class: design
+    group: domain
+    widget: number
+    show_if:
+      wps:map_proj:
+      - lambert
+      - polar
+  wps:truelat2:
+    class: design
+    group: domain
+    widget: number
+    show_if:
+      wps:map_proj:
+      - lambert

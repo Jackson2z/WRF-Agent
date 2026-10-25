@@ -1,0 +1,58 @@
+# Audit definitions — frozen BEFORE counting. measure_audit.py reads this file and nothing else decides a definition.
+# Changing a definition means editing this file (with a reason below) and re-running; numbers are never hand-edited.
+status: frozen              # confirmed by the authors on 2026-10-25
+proposed_on: '2026-10-25'
+frozen_on: '2026-10-25'
+
+unit:
+  counting: code_branch     # one entry per refusal/rewrite statement in share/module_check_a_mundo.F,
+                            # counted once even when it sits inside a per-domain loop
+  refuse: a statement that increments count_fatal_error (wrf.exe stops at start-up)
+  rewrite: an assignment to model_config_rec % <name> (the value the user supplied is replaced)
+  disjoint: true            # a statement is one or the other, never both
+
+announced:
+  primary: printed_at_default_debug_level
+  definitions:
+    printed_at_default_debug_level: >-
+      the same IF/CASE branch contains a call that prints at debug_level = 0 (the WRF default):
+      wrf_message, wrf_error_fatal, or wrf_debug(0, ...). A single-line IF and the subroutine body have no branch of
+      their own, so a print elsewhere is not attributed to them. Field: emit_level == 0.
+    printed_only_with_debug: wrf_debug(n, ...) with n >= 1 is the lowest print in the branch (emit_level >= 1).
+    printed_at_default_upper_bound: >-
+      sensitivity bound for the primary measure: also counts a statement when any level-0 print lies within 10
+      source lines in the same subroutine (field nearby_emit_level == 0), which catches a notice placed in an
+      adjacent branch but may attribute an unrelated print. The paper reports the primary value with this bound.
+    message_text_present: >-
+      text was assigned to wrf_err_message near the statement (field: message non-empty). Kept for comparison only;
+      it neither implies nor is implied by printing (WRITE(wrf_err_message, ...) is not detected, and NOTE text is
+      often printed with wrf_debug(1, ...)).
+
+study_defining:
+  # S = the parameters that define a study's experiment: the 28 fields field_map.yaml classes as human design
+  # decisions (period, domain/nesting, physics, urban scheme, output cadence). Frozen here as a list; the measurement
+  # fails if field_map.yaml has drifted from it, so the set cannot change silently.
+  source: src/userguide/field_map.yaml (class == design)
+  params: [bl_pbl_physics, cu_physics, dx, e_sn, e_vert, e_we, end_date, frames_per_outfile, history_interval,
+           i_parent_start, j_parent_start, map_proj, max_dom, mp_physics, parent_grid_ratio, ra_lw_physics,
+           ra_sw_physics, ref_lat, ref_lon, restart_interval, sf_sfclay_physics, sf_surface_physics,
+           sf_urban_physics, stand_lon, start_date, truelat1, truelat2, use_wudapt_lcz]
+  relations:
+    involves: the statement's target or any variable in its enclosing conditions is in S
+    replaces: (rewrites only) the variable whose value is replaced is itself in S
+
+rewritable_fraction:
+  numerator: distinct rewrite targets that the recorded build accepts as namelist variables
+  denominator: namelist variables the recorded build accepts (NAMELIST statements in inc/namelist_statements.inc)
+  note: describes one build of one release; counts variables that CAN be rewritten, not that commonly are
+
+drift:
+  releases: ['4.4.2', '4.5.1', '4.6.1', '4.7.1']
+  signature: (kind, subroutine, target, value, enclosing conditions) — line numbers are not compared
+  sources: wrf-model/WRF@v<release>:share/module_check_a_mundo.F, sha256 recorded per release
+
+coverage:
+  ported: a statement whose source line is cited by a rule in field_map.yaml constraints, checks.CAM_BUILD_DEPENDENT
+          or the two explicit start-up checks in checks.py
+
+changes: []

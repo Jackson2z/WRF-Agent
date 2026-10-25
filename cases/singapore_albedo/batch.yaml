@@ -1,0 +1,13 @@
+# C01-shaped batch: 3 roof × 3 wall albedo × 2 PBL = 18 members (the Singapore study design).
+# Usage (pure backend, no UI):
+#   wrf-agent-studio case-init <case> --request "..." --draft examples/singapore_albedo/draft.yaml
+#   # ... review + submit in the studio, then:
+#   cp examples/singapore_albedo/batch.yaml <case>/batch.yaml   # set urbparm_base to your 3-class table
+#   python -m src.userguide batch <case>
+base: experiment.yaml
+urbparm_base: batch/URBPARM.TBL   # a 3-class USGS table (ALBR/ALBB: v,v,v); put yours in <case>/batch/
+axes:
+  albr: {target: "urbparm:ALBR", values: [0.12, 0.20, 0.60]}   # roof albedo
+  albb: {target: "urbparm:ALBB", values: [0.12, 0.20, 0.60]}   # wall albedo
+  pbl:  {target: "input:bl_pbl_physics", values: [2, 8],       # MYJ / BouLac
+         companions: {"input:sf_sfclay_physics": {2: 2, 8: 1}}}  # surface layer follows the PBL choice

@@ -1,0 +1,21 @@
+version: 2
+# Overlapping perspectives only during design discussion. No exclusive field ownership.
+specialists:
+  - id: research_design
+    title: Research design
+    summary: "Scientific question, control groups, confounders, and interpretable comparisons."
+    owns: ['wps:*', 'input:*']
+    reads: []
+    tools: [lookup_parameter, check_draft]
+  - id: wrf_physics
+    title: WRF physics and numerics
+    summary: "WRF physics coupling, nesting, numerical stability and urban parameterisation."
+    owns: ['wps:*', 'input:*']
+    reads: []
+    tools: [lookup_parameter, check_draft]
+  - id: forcing_cost
+    title: Forcing, data and feasibility
+    summary: "Boundary data, coverage, run and storage cost, feasibility and reproducibility."
+    owns: ['wps:*', 'input:*']
+    reads: []
+    tools: [lookup_parameter, check_draft]
