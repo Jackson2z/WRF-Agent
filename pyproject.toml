@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wrfagent"
-version = "0.1.0.dev0"
-description = "WRF configuration fidelity: start-up check audit, specification checks and deterministic namelist generation (preview)"
+version = "0.2.0.dev0"
+description = "Multi-agent WRF configuration: specialist deliberation, compile-checked specification, deterministic namelist generation, start-up check audit"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [{name = "WRF-Agent Team"}]
-keywords = ["wrf", "namelist", "configuration", "reproducibility", "workflow"]
+keywords = ["wrf", "namelist", "configuration", "reproducibility", "multi-agent", "workflow"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
     "Programming Language :: Python :: 3",
@@ -20,11 +20,21 @@ classifiers = [
 dependencies = ["pyyaml>=6.0"]
 
 [project.optional-dependencies]
-test = ["pytest>=7"]
+llm = ["openai>=1.0"]
+mcp = ["fastmcp>=2.0"]
+test = ["pytest>=7", "openai>=1.0"]
+
+[project.scripts]
+wrf-agent-studio = "src.userguide.studio:main"
+wrf-agent-dashboard-mcp = "src.userguide.mcp_dashboard:main"
+
+[project.urls]
+Repository = "https://github.com/Jackson2z/WRF-Agent"
+Issues = "https://github.com/Jackson2z/WRF-Agent/issues"
 
 [tool.setuptools.packages.find]
 include = ["src", "src.*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.md", "*.yaml"]
+"*" = ["*.json", "*.md", "*.yaml", "*.png"]

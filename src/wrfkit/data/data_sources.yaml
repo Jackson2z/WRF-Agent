@@ -1,0 +1,99 @@
+metadata:
+  source: wrf-workflow/references/data-sources.md
+  extracted: 2026-06-09
+  description: WRF forcing data sources (ERA5, GFS, FNL) with download parameters and preparation workflow
+
+data_sources:
+  era5:
+    name: ERA5
+    type: Reanalysis
+    resolution: "0.25 deg"
+    levels: 37
+    level_type: pressure + surface
+    temporal_resolution: Hourly
+    data_delay: "~5 days"
+    provider: ECMWF / Copernicus CDS
+    auth_file: "~/.cdsapirc"
+    auth_type: CDS API key
+    python_package: cdsapi
+    default: true
+    download_time: "~1 hour per month"
+    vtable: Vtable.ECMWF
+    ungrib_prefix: FILE
+    pressure_variables:
+      - temperature
+      - relative_humidity
+      - geopotential
+      - u-component_of_wind
+      - v-component_of_wind
+    surface_variables:
+      - 10m_u_component_of_wind
+      - 10m_v_component_of_wind
+      - 2m_temperature
+      - 2m_dewpoint_temperature
+      - surface_pressure
+      - mean_sea_level_pressure
+      - sea_surface_temperature
+      - skin_temperature
+      - soil_temperature_level_1
+      - soil_temperature_level_2
+      - soil_temperature_level_3
+      - soil_temperature_level_4
+      - soil_moisture_level_1
+      - soil_moisture_level_2
+      - soil_moisture_level_3
+      - soil_moisture_level_4
+      - snow_depth
+
+  gfs:
+    name: GFS
+    type: Forecast
+    resolution: "0.25 deg"
+    levels: 31
+    level_type: pressure + surface
+    temporal_resolution: "3-hourly (0-240h), 6-hourly (240-384h)"
+    data_delay: "real-time"
+    provider: NOAA NCEP
+    auth: None
+    python_package: requests
+    default: false
+    download_time: "~30 min per month"
+    vtable: Vtable.GFS
+    ungrib_prefix: FILE
+    use_case: Real-time forecasting
+
+  fnl:
+    name: FNL
+    type: Reanalysis
+    resolution: "0.25 deg or 0.5 deg"
+    levels: 34
+    level_type: pressure + surface
+    temporal_resolution: 6-hourly
+    data_delay: "~2 days"
+    provider: NCAR RDA
+    auth_type: NCAR RDA account
+    default: false
+    vtable: Vtable.GFS
+    ungrib_prefix: FILE
+    use_case: Preferred for hindcast studies
+
+preparation_workflow:
+  description: Data preparation steps in Docker
+  steps:
+    - step: 1
+      name: Download data
+      command: "docker exec wrf-container python3 /WRF_workplaces/WRF-Agent/scripts/download_era5.py --start YYYY-MM-DD --end YYYY-MM-DD --area 'lat1,lon1,lat2,lon2'"
+      notes: "Download on host, then mount into container"
+    - step: 2
+      name: Link Vtable
+      command: "docker exec wrf-container bash -c \"cd /path/to/wps && ln -sf ungrib/Variable_Tables/Vtable.ECMWF Vtable\""
+    - step: 3
+      name: Run ungrib
+      command: "docker exec wrf-container bash -c \"cd /path/to/wps && ./ungrib.exe\""
+    - step: 4
+      name: Run geogrid
+      command: "docker exec wrf-container bash -c \"cd /path/to/wps && ./geogrid.exe\""
+      notes: "If not already done"
+    - step: 5
+      name: Run metgrid
+      command: "docker exec wrf-container bash -c \"cd /path/to/wps && ./metgrid.exe\""

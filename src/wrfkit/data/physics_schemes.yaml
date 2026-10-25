@@ -1,0 +1,152 @@
+metadata:
+  source: wrf-workflow/references/physics-guide.md
+  extracted: 2026-06-09
+  description: WRF physics scheme catalog for urban microclimate / BIPV / UHI studies
+
+microphysics:
+  description: Precipitation microphysics schemes
+  schemes:
+    - id: 3
+      name: WSM3
+      feature: single-moment 3-class (simplified ice)
+      use_case: "HK_RPV 产线默认：跨境长算例用轻量方案换速度（2026-10-22 真 namelist 核对：全部 8 个 M1 算例 mp_physics=3）"
+    - id: 6
+      name: WSM6
+      feature: graupel
+      use_case: Tropical systems, typhoon
+    - id: 8
+      name: Thompson
+      feature: single-moment, 6-class
+      use_case: "Default for urban/BIPV — warm-season convection, widely validated"
+      recommended: true
+    - id: 10
+      name: Morrison 2-mom
+      feature: two-moment ice microphysics
+      use_case: Research-grade ice microphysics
+    - id: 28
+      name: Thompson aerosol-aware
+      feature: aerosol interaction
+      use_case: Urban environments with aerosol effects
+
+cumulus:
+  description: Cumulus parameterization schemes
+  auto_detect_rule: "dx > 10km -> cu_physics=1; dx 4-10km -> cu_physics=3; dx < 4km -> cu_physics=0"
+  schemes:
+    - id: 0
+      name: None
+      feature: convection-permitting
+      use_case: "dx <= 3km — urban inner domains"
+      recommended_dx_range: "<= 3km"
+    - id: 1
+      name: Kain-Fritsch
+      feature: mass-flux
+      use_case: "dx > 10km — parent domain d01 default"
+      recommended_dx_range: "> 10km"
+    - id: 3
+      name: Grell-Freitas
+      feature: scale-aware
+      use_case: Gray zone (4-10km)
+      recommended_dx_range: "4-10km"
+    - id: 11
+      name: Multi-scale KF
+      feature: scale-aware
+      use_case: Alternative gray zone option
+      recommended_dx_range: "4-10km"
+
+pbl:
+  description: Planetary boundary layer schemes
+  schemes:
+    - id: 1
+      name: YSU
+      feature: non-local closure
+      use_case: General, stable conditions
+    - id: 2
+      name: "MYNN 2.5 TKE"
+      feature: local TKE closure
+      use_case: "Default for urban — coupled with MYNN surface layer"
+      recommended: true
+    - id: 8
+      name: BouLac
+      feature: local TKE
+      use_case: LES applications
+
+radiation:
+  description: Radiation parameterization schemes
+  schemes:
+    - id: 4
+      name: RRTMG SW/LW
+      feature: correlated-k, most accurate
+      use_case: "Default — most accurate for BIPV solar radiation"
+      recommended: true
+      notes: "ra_lw_physics=4 needs ozone input; set o3input=2 for CAM5 ozone data"
+    - id: 1
+      name: Dudhia SW
+      feature: simple shortwave
+      use_case: Fast, less accurate
+
+surface:
+  description: Land surface model schemes
+  schemes:
+    - id: 2
+      name: Noah-MP
+      feature: dynamic vegetation, multi-parameterization
+      use_case: "Default LSM"
+      recommended: true
+      num_soil_layers: 4
+      num_land_cat: 21
+      land_cat_dataset: MODIS/IGBP
+
+urban:
+  description: Urban canopy model schemes
+  schemes:
+    - id: 0
+      name: None (no urban canopy)
+      feature: off
+      use_case: "粗域 d01/d02 常态：只有最内层开 BEP+BEM；HK_RPV / Exergy 实测 sf_urban_physics=0,0,3"
+    - id: 1
+      name: Single-layer UCM
+      feature: simple urban canopy
+      use_case: Basic urban effects (no BEM)
+    - id: 2
+      name: Multi-layer UCM
+      feature: multi-layer urban canopy
+      use_case: Enhanced urban representation
+    - id: 3
+      name: "BEP+BEM"
+      feature: Building energy model + building effect parameterization
+      use_case: "Required for BIPV thermal exchange"
+      recommended: true
+      notes: "Requires LANDUSE=USGS; NLCD43 will error. Each domain must have LU_INDEX."
+
+key_parameters:
+  description: Common physics-related parameters
+  params:
+    - name: radt
+      description: Radiation calling interval (minutes)
+      formula: "max(1, DX_km)"
+    - name: bldt
+      description: PBL calling interval (minutes)
+      default: 0
+      notes: "0 = every time step"
+    - name: cudt
+      description: Cumulus calling interval (minutes)
+      default: 5
+    - name: num_soil_layers
+      description: Number of soil layers
+      default: 4
+      notes: "Noah-MP requires 4"
+    - name: num_land_cat
+      description: Number of land use categories
+      default: 21
+      notes: "MODIS/IGBP"
+
+physics_suites:
+  description: Pre-configured physics suite shortcuts
+  suites:
+    - name: CONUS
+      description: Continental US defaults
+    - name: tropical
+      description: Tropical cyclone defaults
+  notes: "Using a suite overrides individual scheme selections"
+
+domain_consistency_rule: "All domains MUST use same radiation, PBL, surface, urban physics"

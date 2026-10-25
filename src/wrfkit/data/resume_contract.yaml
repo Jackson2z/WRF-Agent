@@ -1,0 +1,47 @@
+# resume_contract.yaml — 跨机迁移续跑契约（v1.0）
+# 权威定义: 6 件套清单/校验规则/已知坑位/验收门禁（工具箱通用版; 项目实例可覆盖阈值）
+# 消费方: wrf-kit case resume-pack/fetch/preflight/watch/accept 五步
+# 来源: wrf-migrate-resume skill (2026-08-23 chicago 战役) + ctl@030 战役补强 (2026-08-26)
+# 原则: resume.py 代码只留机制, 清单与阈值全部读本文件
+
+contract_version: "1.0"
+date_frozen: 2026-08-26
+
+# ---- 6 件套（迁移必需清单; 缺一 preflight BLOCK）----
+required_pieces:
+  wrfrst_d01: {desc: "d01 重启态", from: run_dir, critical: true}
+  wrfrst_d02: {desc: "d02 重启态", from: run_dir, critical: true}
+  wrfrst_d03: {desc: "d03 重启态", from: run_dir, critical: true}
+  wrfbdy_d01: {desc: "外强迫(场景无关)", from: "run_dir 或 wps_dir symlink", critical: true,
+               note: "缺 → 目标机 FATAL med_latbound_in IERR=-1021"}
+  namelist_input: {desc: "含 resume=true 窗口", from: run_dir, critical: true}
+  urbparm: {desc: "场景城市参数表", from: "run 目录 roof_pv 版 → 现表 → 上级 roof_pv 版", critical: true,
+            probe_chain: ["URBPARM.TBL.roof_pv", "URBPARM.TBL", "../URBPARM.TBL.roof_pv"]}
+
+# ---- 传输完整性 ----
+integrity:
+  size_check: true          # stat 字节级核对（S3 截断防御; pitfall: wrfrst 少 1405B → netCDF Errno -51）
+  md5_spotcheck_n: 2        # 抽查文件数（resume-fetch 时）
+  s3_truncate_min_bytes: 1024
+
+# ---- 目标机组装 ----
+staging:
+  runtime_datalinks_from: "wrf 安装 run 目录批量软链（排除 URBPARM.TBL 场景自有）"
+  urbparm_scenario_rule: "scen=roof_pv 且无现表 → 用 URBPARM.TBL.roof_pv"
+  bdy_end_rule: "bdy 末条 = end − 6h；缺则重跑 real（禁止盲跑）"
+
+# ---- 验收门禁（resume-watch/accept）----
+acceptance:
+  frames_expected: 577            # 全窗（原跑+续跑合并）
+  interval_minutes: 20
+  grid_continuity: true           # 20min 网格门禁（重叠帧去重后）
+  overlap_dedup: "续跑与原跑重叠帧以 wrfrst 起点切分"
+  window_check: "首帧=window_start 末帧=window_end"
+  success_marker: "SUCCESS COMPLETE WRF"
+
+# ---- 已知坑位表（preflight 反查）----
+pitfalls:
+  - {id: pit1, pattern: "Errno -51|netCDF 错误", cause: "S3 下载截断", fix: "重传该件, size_check 拦截"}
+  - {id: pit2, pattern: "IERR=-1021|med_latbound_in", cause: "wrfbdy_d01 漏", fix: "补 6 件套 wrfbdy"}
+  - {id: pit3, pattern: "bdy 时间不足", cause: "bdy 末条 < end-6h", fix: "重跑 real (禁止直接续)"}
+  - {id: pit4, pattern: "城市参数漂移", cause: "URBPARM 用错场景", fix: "probe_chain 重选 + diff 确认"}

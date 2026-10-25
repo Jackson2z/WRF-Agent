@@ -1,0 +1,6 @@
+# Urban heat in Singapore, July 2024: roof and wall albedo sensitivity with BEP+BEM.
+# Three one-way nested domains at 9, 3 and 1 km centred on 1.35 N, 103.8 E; the innermost
+# domain covers mainland Singapore. Eight-day window starting 2024-07-13 18 UTC, with the
+# first 48 hours as spin-up. GFS 0.25-degree analyses at 6-hour intervals as forcing.
+# Compare five roof/wall albedo scenarios against a control under two boundary-layer
+# schemes (MYJ and BouLac). Output every 20 minutes for the urban domain.

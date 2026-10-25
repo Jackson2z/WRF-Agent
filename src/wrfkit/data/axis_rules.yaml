@@ -1,0 +1,80 @@
+# axis_rules.yaml — Exergy-city 15 轴设计空间提交门禁（v4 轴系规则化）
+# 消费方: wrf_kit/namelist_gate.py（通用引擎）
+# 口径: 与 dimensions/registry.yaml + design_space_master_plan_20260913.md 同源
+# 分级: FAIL=拦提交 · WARN=提示声明义务 · INFO=滞后轴（记录不拦）
+# 物理范围规则（0-1 等）拦"非法值"；实验档位（如 α 4 档）是设计选择，不做提交拦截。
+
+source: namelist   # 主解析目标 = namelist.input；urbparm 轴见 source: urbparm_table 段
+
+rules:
+  # ── namelist.input 轴 ──
+  - id: axis6_evert
+    description: "轴6 e_vert 冠层竖层：合法值 45/60（chengdu 对齐验证过）+ 51（HK_RPV 产线，2026-10-22 实测）"
+    severity: FAIL
+    check:
+      type: membership
+      when_key: e_vert
+      then_key: e_vert          # 自映射：取值须在 allowed 全集（validator 特例：allowed 为扁平档位表时检查 e_vert 本身）
+      allowed:
+        45: [45]
+        51: [51]               # HK_RPV 线：e_vert=51（真 namelist 核对，原先被静默跳过）
+        60: [60]
+  - id: axis7_dx_d03
+    description: "轴7 d03 分辨率：1km 主线（500m 属 M08/M06 特例，dirty 需声明）"
+    severity: WARN
+    check:
+      type: range
+      key: dx                   # namelist dx= 为三元组，parse 取首值 d01；d03 校验走 urbparm 段备注
+      min: 100
+      max: 10000
+  - id: axis9_pbl_sfclay
+    description: "轴9 PBL×表面层组合兼容"
+    severity: FAIL
+    check:
+      type: membership
+      when_key: bl_pbl_physics
+      then_key: sf_sfclay_physics
+      allowed:
+        1:  [1, 91]
+        2:  [2]
+        5:  [1, 5]
+        8:  [1, 91]
+        12: [1, 91]
+
+  # ── URBPARM.TBL 轴（engine source=urbparm_table）──
+  - id: axis1_albr_roof
+    description: "轴1 屋面反照率：物理界 [0,1]"
+    severity: FAIL
+    source: urbparm_table
+    parse_file: URBPARM.TBL
+    check: {type: range, key: ALBR, min: 0.0, max: 1.0}
+  - id: axis2_albr_wall
+    description: "轴2 墙面反照率：物理界 [0,1]"
+    severity: FAIL
+    source: urbparm_table
+    parse_file: URBPARM.TBL
+    check: {type: range, key: ALBB, min: 0.0, max: 1.0}
+  - id: axis3_pv_frac
+    description: "轴3 PV_FRAC 覆盖率：物理界 [0,1]"
+    severity: FAIL
+    source: urbparm_table
+    parse_file: URBPARM.TBL
+    check: {type: range, key: PV_FRAC_ROOF, min: 0.0, max: 1.0}
+
+  # ── 滞后轴（源码级，INFO 记录不拦——解禁时升 FAIL 并补 parse_file: 源码参数）──
+  - id: axis11_eta_pv
+    description: "轴11 η_PV 器件效率（源码 effpv=0.19；编译级——滞后）"
+    severity: INFO
+    check: {type: required, keys: []}
+  - id: axis12_alpha_pv
+    description: "轴12 α_PV 板面反照率（源码 albpv=0.11；编译级——滞后）"
+    severity: INFO
+    check: {type: required, keys: []}
+  - id: axis13_gap
+    description: "轴13 安装间隙（源码未参数化——滞后）"
+    severity: INFO
+    check: {type: required, keys: []}
+  - id: axis14_gamma
+    description: "轴14 γ 温度系数（源码 0.005——滞后）"
+    severity: INFO
+    check: {type: required, keys: []}

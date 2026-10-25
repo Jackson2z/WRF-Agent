@@ -1,0 +1,107 @@
+metadata:
+  source: wrf-workflow/references/experiment-protocol.md
+  extracted: 2026-06-09
+  description: WRF experiment design protocol — control vs perturbation setup, comparison variables, and post-processing
+
+protocol:
+  name: Control vs Perturbation Design
+  description: "Systematic framework for WRF sensitivity and attribution studies"
+
+  setup:
+    directory_structure:
+      control: "exp_<name>/control/"
+      perturbation: "exp_<name>/perturbation/"
+    shared_properties:
+      - Same domain configuration (namelist.wps)
+      - Same time period
+      - Same physics (except the perturbation variable)
+      - Same initial/boundary data
+    perturbation_rule: "Only difference: the perturbation parameter(s) in namelist.input"
+
+  common_perturbations:
+    - study: BIPV thermal effect
+      control: "sf_urban_physics=1 (no BEM)"
+      perturbation: "sf_urban_physics=3 (BEP+BEM)"
+    - study: Albedo change
+      control: ALBEDO default
+      perturbation: "Modified ALBEDO (e.g., +0.3)"
+    - study: Green roof
+      control: Default LSM parameters
+      perturbation: "Modified LAI, albedo, soil"
+    - study: PV panel cooling
+      control: Standard panel temp
+      perturbation: "Reduced panel temp (via URBPARM)"
+
+  output_variables:
+    - name: 2m Temperature
+      wrf_name: T2
+      unit: K
+      description: Near-surface air temperature
+    - name: 10m Wind Speed
+      wrf_name: "U10, V10"
+      unit: m/s
+      description: Near-surface wind
+    - name: Shortwave Down
+      wrf_name: SWDOWN
+      unit: W/m2
+      description: Incoming solar radiation
+    - name: Sensible Heat
+      wrf_name: HFX
+      unit: W/m2
+      description: Surface sensible heat flux
+    - name: Latent Heat
+      wrf_name: LH
+      unit: W/m2
+      description: Surface latent heat flux
+    - name: Ground Heat
+      wrf_name: GRDFLX
+      unit: W/m2
+      description: Ground heat flux
+    - name: Skin Temperature
+      wrf_name: TSK
+      unit: K
+      description: Surface skin temperature
+
+spinup:
+  description: Spin-up period guidance
+  recommended_hours: 24
+  minimum_hours: 12
+  notes: "Allow model to adjust from initial/boundary conditions before analysis"
+
+sensitivity:
+  description: Sensitivity analysis framework
+  steps:
+    - "Define control and perturbation parameter ranges"
+    - "Run one-at-a-time (OAT) perturbations"
+    - "Extract domain-average and spatial metrics"
+    - "Compute sensitivity index: SI = dY/dP * P/Y"
+  output_metrics:
+    - "Domain-average delta T2 (K)"
+    - "Domain-average delta U10 (m/s)"
+    - "Domain-average delta SWDOWN (W/m2)"
+    - "Time-series of hourly differences"
+    - "Spatial maps of differences"
+    - "Significance test (paired t-test at each grid point)"
+
+comparison_protocol:
+  steps:
+    - step: 1
+      description: Run both simulations to completion
+    - step: 2
+      description: Extract wrfout variables with wrf-python
+    - step: 3
+      description: "Compute difference: delta = perturbation - control"
+    - step: 4
+      description: "Compute relative change: delta_pct = (delta / control) * 100"
+    - step: 5
+      description: "Flag significant changes: |delta_pct| > 5%"
+
+statistical_metrics:
+  - "Domain-average deltaT2, deltaU10, deltaSWDOWN"
+  - "Time-series of hourly differences"
+  - "Spatial maps of differences"
+  - "Significance test (paired t-test at each grid point)"
+
+docker_execution:
+  run_control: "docker exec wrf-container bash -c \"cd /path/to/exp/control && bash Allrun\""
+  run_perturbation: "docker exec wrf-container bash -c \"cd /path/to/exp/perturbation && bash Allrun\""

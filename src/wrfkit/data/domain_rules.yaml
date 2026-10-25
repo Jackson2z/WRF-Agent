@@ -1,0 +1,139 @@
+metadata:
+  source: wrf-workflow/references/namelist-templates.md + cross-file-validation.md
+  extracted: 2026-06-09
+  description: WRF domain configuration rules and WPS-WRF cross-file validation constraints
+
+domain_rules:
+  - id: 1
+    rule: "time_step = 5 * DX_km (max 6x, reduce to 3-4x if CFL)"
+    formula: "time_step = 5 * DX_km"
+    max_formula: "time_step = 6 * DX_km"
+    cfl_fallback: "time_step = 3 * DX_km"
+    severity: CRITICAL
+    category: timestep
+
+  - id: 2
+    rule: "parent_grid_ratio must be odd numbers (3 or 5)"
+    allowed_values: [3, 5]
+    severity: CRITICAL
+    category: nesting
+
+  - id: 3
+    rule: "e_we/e_sn = n * ratio + 1 for nested domains"
+    formula: "e_we = n * parent_grid_ratio + 1"
+    example: "If parent has 100 points and ratio=5, nested needs e_we = N*5+1"
+    severity: CRITICAL
+    category: grid_dimensions
+
+  - id: 4
+    rule: "e_vert is a single value, identical across all domains"
+    recommended_range: "40-60"
+    minimum: 35
+    severity: MAJOR
+    category: vertical
+
+  - id: 5
+    rule: "WPS parent_id d01=1; WRF parent_id d01=0"
+    wps_convention:
+      d01: 1
+      d02: 1
+      d03: 2
+    wrf_convention:
+      d01: 0
+      d02: 1
+      d03: 2
+    mapping: "WRF parent_id = WPS parent_id - 1 for d01 only"
+    severity: CRITICAL
+    category: parent_id
+
+  - id: 6
+    rule: "Nested domains keep ~1/3 margin from parent boundaries"
+    margin_fraction: 0.33
+    severity: MAJOR
+    category: nesting
+
+  - id: 7
+    rule: "Domain minimum ~100x100 grid points"
+    min_points: 100
+    severity: MAJOR
+    category: grid_dimensions
+
+  - id: 8
+    rule: "dx == dy for Lambert/Mercator/Polar projections"
+    severity: CRITICAL
+    category: projection
+
+  - id: 9
+    rule: "radt = max(1, DX_km) minutes"
+    formula: "max(1, DX_km)"
+    severity: MAJOR
+    category: radiation_interval
+
+  - id: 10
+    rule: "Radiation/PBL/surface/urban physics: ALL domains same values"
+    affected_params:
+      - ra_sw_physics
+      - ra_lw_physics
+      - bl_pbl_physics
+      - sf_surface_physics
+      - sf_urban_physics
+      - sf_sfclay_physics
+    severity: CRITICAL
+    category: physics_consistency
+
+cross_file_validation:
+  description: "Parameters that MUST be identical between namelist.wps and namelist.input"
+  shared_params:
+    - name: max_dom
+      wps_section: "&share"
+      wrf_section: "&domains"
+    - name: e_we
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: e_sn
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: dx
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: dy
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: parent_grid_ratio
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: i_parent_start
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: j_parent_start
+      wps_section: "&geogrid"
+      wrf_section: "&domains"
+    - name: interval_seconds
+      wps_section: "&share"
+      wrf_section: "&time_control"
+
+  date_validation:
+    - "start_date in WPS must match start_year/month/day/hour in WRF"
+    - "end_date in WPS must match end_year/month/day/hour in WRF"
+
+  validation_checklist:
+    - "Extract params from namelist.wps &share and &geogrid"
+    - "Verify all 9 shared params are present and numerically equal"
+    - "Verify parent_id follows WPS->WRF mapping rule"
+    - "Verify dates match"
+    - "If any mismatch: ERROR (must fix before proceeding)"
+    - "If any param missing in WRF: ERROR"
+    - "If any param missing in WPS: WARNING"
+
+  namelist_common_errors:
+    - field: e_vert
+      wrong: e_vertical
+      note: "Field name is e_vert, not e_vertical"
+    - field: p_top_requested
+      wrong_unit: hPa
+      correct_unit: Pa
+      note: "p_top_requested unit is Pa, not hPa"
+    - field: dx/dy
+      wrong_unit: km
+      correct_unit: m
+      note: "dx/dy unit is meters, not kilometers"

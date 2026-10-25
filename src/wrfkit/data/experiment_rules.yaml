@@ -1,0 +1,51 @@
+metadata:
+  source: >-
+    DOE/sensitivity baseline-consistency
+    (2026-07-28 DOE 11类URBPARM误用教训,
+    feedback_doe_urbparm_baseline_mismatch)
+  description: >-
+    DOE/sensitivity run vs baseline 配置一致性, sbatch 前硬卡口.
+
+experiment_config_consistency:
+  severity: CRITICAL
+  urbparm:
+    description: >-
+      URBPARM.TBL 只允许实验变量漂移, 其他全必须 match baseline.
+      防止 3-class WRF URBPARM.TBL 被替换成 11-class LCZ 表后
+      ALBR/AH 等全部静默漂移.
+    allowed_drift_keys: [ALBR, ALBB]
+    must_match_others: true
+    must_match_num_categories: true
+  namelist:
+    description: >-
+      namelist 物理/domain 必须与 baseline 逐字一致.
+    must_match_sections:
+      physics:
+        - sf_urban_physics
+        - bl_pbl_physics
+        - mp_physics
+        - ra_lw_physics
+        - ra_sw_physics
+        - sf_surface_physics
+        - cu_physics
+      domains:
+        - max_dom
+        - e_we
+        - e_sn
+        - dx
+        - dy
+        - parent_grid_ratio
+        - i_parent_start
+        - j_parent_start
+        - num_tiles
+      time_control:
+        - run_days
+        - run_hours
+        - start_year
+        - start_month
+        - start_day
+        - start_hour
+        - end_year
+        - end_month
+        - end_day
+        - end_hour

@@ -1,0 +1,103 @@
+{
+  "description": "WRF meteorological data sources for input forcing",
+  "version": "1.0.0",
+  "sources": {
+    "ERA5": {
+      "type": "reanalysis",
+      "resolution": "0.25 degree",
+      "levels": "37 pressure levels + surface",
+      "temporal": "hourly",
+      "delay": "5 days",
+      "provider": "ECMWF / Copernicus CDS",
+      "package": "cdsapi",
+      "auth_required": true,
+      "auth_file": "~/.cdsapirc",
+      "url": "https://cds.climate.copernicus.eu/",
+      "download_script": "era5_download.py",
+      "estimated_time_per_month": "1 hour",
+      "variables_pressure": [
+        "temperature", "relative_humidity", "geopotential",
+        "u_component_of_wind", "v_component_of_wind"
+      ],
+      "variables_surface": [
+        "10m_u_component_of_wind", "10m_v_component_of_wind",
+        "2m_temperature", "2m_dewpoint_temperature",
+        "surface_pressure", "mean_sea_level_pressure",
+        "sea_surface_temperature", "skin_temperature",
+        "soil_temperature_level_1", "soil_temperature_level_2",
+        "soil_temperature_level_3", "soil_temperature_level_4",
+        "volumetric_soil_water_layer_1", "volumetric_soil_water_layer_2",
+        "volumetric_soil_water_layer_3", "volumetric_soil_water_layer_4",
+        "snow_depth", "high_vegetation_cover", "low_vegetation_cover"
+      ],
+      "cdsapi_request_template": {
+        "product_type": "reanalysis",
+        "format": "grib",
+        "variable": [],
+        "pressure_level": [],
+        "year": "",
+        "month": "",
+        "day": "",
+        "time": [],
+        "area": []
+      }
+    },
+    "GFS": {
+      "type": "forecast",
+      "resolution": "0.25 degree",
+      "levels": "31 pressure levels + surface",
+      "temporal": "3-hourly (0-240h), 6-hourly (240-384h)",
+      "provider": "NOAA NCEP",
+      "package": "requests",
+      "auth_required": false,
+      "url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl",
+      "download_script": "gfs_download.py",
+      "estimated_time_per_month": "30 minutes",
+      "variables": [
+        "TMP", "RH", "HGT", "UGRD", "VGRD",
+        "PRES", "TCDC", "SOILW", "SOILT",
+        "LAND", "ICEC", "WEASD", "SNOD"
+      ],
+      "notes": "Best for real-time forecasting. GFS 0.25 provides 3-hourly data up to 10 days."
+    },
+    "FNL": {
+      "type": "reanalysis",
+      "resolution": "0.25 degree (ds083.2) or 0.5 degree (ds083.3)",
+      "levels": "34 pressure levels + surface",
+      "temporal": "6-hourly",
+      "delay": "2 days",
+      "provider": "NCAR RDA / CISL",
+      "package": "requests",
+      "auth_required": true,
+      "auth": "NCAR RDA account required",
+      "url": "https://rda.ucar.edu/datasets/ds083.2/",
+      "download_script": "fnl_download.py",
+      "estimated_time_per_month": "45 minutes",
+      "notes": "FNL ds083.2 is the operational model analysis, preferred for hindcast studies."
+    },
+    "HRRR": {
+      "type": "forecast",
+      "resolution": "3 km",
+      "levels": "50 levels + surface",
+      "temporal": "hourly (0-18h) for 3km, 3-hourly (0-48h) for subhourly",
+      "provider": "NOAA",
+      "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod/",
+      "package": "requests",
+      "auth_required": false,
+      "notes": "High-resolution for US only. Useful for WRF boundary conditions in CONUS domains."
+    },
+    "GDAS": {
+      "type": "analysis",
+      "resolution": "0.25 degree",
+      "levels": "31 pressure levels + surface",
+      "temporal": "6-hourly",
+      "provider": "NOAA NCEP",
+      "url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gdas_0p25.pl",
+      "package": "requests",
+      "auth_required": false,
+      "notes": "GDAS is the Global Data Assimilation System, useful for initial conditions."
+    }
+  },
+  "default_source": "ERA5",
+  "default_reason": "ERA5 provides the most complete reanalysis dataset for urban microclimate studies"
+}

@@ -1,0 +1,156 @@
+{
+  "description": "WRF error patterns and solutions for automated error recovery",
+  "version": "1.0.0",
+  "patterns": [
+    {
+      "id": "err_001",
+      "pattern": "------ ERROR ------",
+      "category": "explicit",
+      "description": "Generic WRF error marker",
+      "action": "Examine surrounding lines for specific error message",
+      "autofix": false
+    },
+    {
+      "id": "err_002",
+      "pattern": "cfl.*exceeded",
+      "category": "cfl",
+      "description": "CFL criterion violation - time step too large for grid spacing",
+      "common_causes": [
+        "time_step too large for dx",
+        "Strong vertical motion in urban thermals",
+        "Insufficient vertical damping"
+      ],
+      "suggested_fixes": [
+        "Reduce time_step (recommend: time_step = 6 × dx for d01)",
+        "Increase w_damping to 1",
+        "Reduce zdamp to 3000",
+        "Increase dampcoef to 0.3"
+      ],
+      "autofix": true,
+      "autofix_strategy": "Reduce time_step by 50% and increase w_damping"
+    },
+    {
+      "id": "err_003",
+      "pattern": "forrtl: severe",
+      "category": "fortran_runtime",
+      "description": "Fortran runtime error (often memory or array bound issues)",
+      "common_causes": [
+        "Insufficient memory for MPI processes",
+        "Array dimension mismatch in namelist",
+        "Land surface input incompatible with num_land_cat"
+      ],
+      "suggested_fixes": [
+        "Reduce number of MPI processes",
+        "Check e_we/e_sn consistency across domains",
+        "Set num_land_cat = 21 for MODIS/IGBP",
+        "Check num_metgrid_soil_levels consistency"
+      ],
+      "autofix": false
+    },
+    {
+      "id": "err_004",
+      "pattern": "Segmentation fault",
+      "category": "segfault",
+      "description": "Segmentation fault - likely memory or input data issue",
+      "common_causes": [
+        "Insufficient stack size (ulimit -s unlimited)",
+        "Corrupted met_em files",
+        "Incompatible boundary condition configuration"
+      ],
+      "suggested_fixes": [
+        "Run: ulimit -s unlimited",
+        "Regenerate met_em files",
+        "Reduce domain size (e_we, e_sn)",
+        "Check for disk space in run directory"
+      ],
+      "autofix": false
+    },
+    {
+      "id": "err_005",
+      "pattern": "FATAL CALLED",
+      "category": "fatal",
+      "description": "WRF called FATAL subroutine - check preceding lines",
+      "common_causes": [
+        "Missing or incorrect namelist parameter",
+        "Incompatible physics scheme combination",
+        "Input data time range mismatch"
+      ],
+      "suggested_fixes": [
+        "Check namelist.input for missing required parameters",
+        "Verify physics scheme compatibility",
+        "Verify met_em files cover the full simulation period"
+      ],
+      "autofix": false
+    },
+    {
+      "id": "err_006",
+      "pattern": "SUCCESS COMPLETE WRF",
+      "category": "success",
+      "description": "WRF simulation completed successfully",
+      "action": "none",
+      "autofix": false
+    },
+    {
+      "id": "err_007",
+      "pattern": "Timing for main",
+      "category": "success_alt",
+      "description": "Alternative success marker in rsl.out.0000",
+      "action": "none",
+      "autofix": false
+    },
+    {
+      "id": "err_008",
+      "pattern": "too many input fields",
+      "category": "metgrid_error",
+      "description": "Too many meteorological fields in met_em files",
+      "suggested_fixes": [
+        "Reduce num_metgrid_levels",
+        "Check Vtable matches downloaded data type"
+      ],
+      "autofix": true,
+      "autofix_strategy": "Set num_metgrid_levels to match available pressure levels"
+    },
+    {
+      "id": "err_009",
+      "pattern": "dx and dy must be positive",
+      "category": "namelist_error",
+      "description": "Invalid grid spacing values in namelist",
+      "suggested_fixes": ["Set positive dx/dy values"],
+      "autofix": false
+    },
+    {
+      "id": "err_010",
+      "pattern": "module_ra_rrtmg",
+      "category": "radiation_error",
+      "description": "RRTMG radiation error - often ozone/atmosphere data missing",
+      "suggested_fixes": [
+        "Ensure ozone data in met_em files",
+        "Set o3input=0 to use climatological ozone"
+      ],
+      "autofix": true,
+      "autofix_strategy": "Add o3input=0 to namelist physics section if missing"
+    },
+    {
+      "id": "err_011",
+      "pattern": "Could not find matching time",
+      "category": "time_mismatch",
+      "description": "Simulation time not found in met_em boundary files",
+      "suggested_fixes": [
+        "Check start/end dates match met_em file times",
+        "Regenerate met_em files with correct date range"
+      ],
+      "autofix": false
+    },
+    {
+      "id": "err_012",
+      "pattern": "mismatch landmask",
+      "category": "landmask",
+      "description": "Land/water mask mismatch in input data",
+      "suggested_fixes": [
+        "Check geogrid GEOGRID.TBL land use categories",
+        "Use consistent land use dataset in WPS"
+      ],
+      "autofix": false
+    }
+  ]
+}

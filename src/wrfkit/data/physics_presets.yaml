@@ -1,0 +1,91 @@
+metadata:
+  source: wrf-workflow/references/physics-guide.md
+  extracted: 2026-06-09
+  description: Pre-configured physics presets for common WRF study scenarios
+
+presets:
+  urban-uhi:
+    description: "Urban UHI study (basic, single domain, dx=1km)"
+    domains: 1
+    dx_km: 1
+    physics:
+      mp_physics: 8
+      cu_physics: 1
+      bl_pbl_physics: 2
+      sf_urban_physics: 3
+      ra_sw_physics: 4
+      ra_lw_physics: 4
+      sf_surface_physics: 2
+      sf_sfclay_physics: 2
+    notes: "Single domain, Kain-Fritsch cumulus, BEP+BEM urban canopy"
+
+  bipv-thermal:
+    description: "BIPV thermal study (nested, dx=1km/200m)"
+    domains: 2
+    dx_km: [1, 0.2]
+    physics:
+      mp_physics: [8, 8]
+      cu_physics: [1, 0]
+      bl_pbl_physics: [2, 2]
+      sf_urban_physics: [3, 3]
+      ra_sw_physics: [4, 4]
+      ra_lw_physics: [4, 4]
+      sf_surface_physics: [2, 2]
+      sf_sfclay_physics: [2, 2]
+    notes: "Parent d01 uses Kain-Fritsch, nested d02 convection-permitting"
+
+  street-canyon:
+    description: "Street canyon study (triple-nested, dx=1km/200m/40m)"
+    domains: 3
+    dx_km: [1, 0.2, 0.04]
+    physics:
+      mp_physics: [8, 8, 8]
+      cu_physics: [1, 0, 0]
+      bl_pbl_physics: [2, 2, 2]
+      sf_urban_physics: [3, 3, 3]
+      ra_sw_physics: [4, 4, 4]
+      ra_lw_physics: [4, 4, 4]
+      sf_surface_physics: [2, 2, 2]
+      sf_sfclay_physics: [2, 2, 2]
+    notes: "Finest d03 at 40m for street-canyon resolution"
+
+  solar:
+    description: "Solar potential assessment (nested, dx=1km/200m)"
+    domains: 2
+    dx_km: [1, 0.2]
+    physics:
+      mp_physics: [8, 8]
+      cu_physics: [1, 0]
+      bl_pbl_physics: [2, 2]
+      sf_urban_physics: [3, 3]
+      ra_sw_physics: [4, 4]
+      ra_lw_physics: [4, 4]
+      sf_surface_physics: [2, 2]
+      sf_sfclay_physics: [2, 2]
+    extra_params:
+      swint_opt: 1
+      history_interval: [30, 30]
+    notes: "Same as BIPV + swint_opt=1 for diagnostics, history_interval <= 30 min"
+
+  hk-rpv:
+    description: "HK_RPV 产线预设（3 域 4.5/1.5/0.5km，BEP+BEM 仅 d03）"
+    domains: 3
+    dx_km: [4.5, 1.5, 0.5]
+    physics:
+      mp_physics: [3, 3, 3]
+      cu_physics: [1, 0, 0]
+      bl_pbl_physics: [8, 8, 8]
+      sf_sfclay_physics: [1, 1, 1]
+      sf_surface_physics: [2, 2, 2]
+      sf_urban_physics: [0, 0, 3]
+      ra_lw_physics: [1, 1, 1]
+      ra_sw_physics: [1, 1, 1]
+    extra_params:
+      num_land_cat: 61
+      e_vert: 51
+      radt: [9, 3, 1]
+      cudt: [5, 0, 0]
+    notes: >-
+      由 2026-10-22 真实 namelist 反推（HK_RPV richeng_revision_round3 M1_albedo_pairs，8 个算例
+      mp=3/ra=1/pbl=8/urban=0,0,3 全一致）。cu 粗域开 Kain-Fritsch、d02/d03 关；
+      num_land_cat=61，e_vert=51（不在 Exergy 45/60 矩阵内，已同步加入 axis_rules allowed）。

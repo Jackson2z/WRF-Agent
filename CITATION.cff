@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below. A paper describing 
 title: "WRF-Agent (public preview)"
 authors:
   - name: "WRF-Agent Team"
-version: "0.1.0-preview"
+version: "0.2.0-preview"
 date-released: "2026-10-25"
 description: >-
   Configuration fidelity tooling for WRF experiment batches: an audit of the start-up consistency checks of WRF,

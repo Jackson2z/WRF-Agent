@@ -1,0 +1,28 @@
+# physics_compat.yaml — 物理方案组合兼容规则（namelist_gate 规则集 #1）
+# 来源: Phoenix YSU 事件 (2026-09-13/14): bl_pbl_physics MYJ(2)→YSU(1) 时 sf_sfclay_physics
+#       未跟随切换(仍=2), WRF 运行时 FATAL "Use sf_sfclay_physics=1 or 91 for this pbl option",
+#       三 case 全部秒退 (frames=0)。教训: 组合合法性必须提交前静态校验。
+# 消费方: wrf_kit/namelist_gate.py（通用引擎）— preflight Q0 经兼容包装调用。
+# 城市方案约束（教训级提示，非 WRF 硬拦截）:
+#   sf_urban_physics=3 (BEP+BEM) 传统上配局地闭合; 非局地 (YSU) 需物理论证并声明
+#   —— 见 M02 unknowns nonlocal_PBL_family。
+
+rules_version: "1.0"
+date_frozen: "2026-09-14"
+source_event: "phoenix_ysu_sfclay_mismatch_20260913"
+
+rules:
+  - id: pbl_sfclay_compat
+    description: "PBL 方案必须配合法表面层方案（bl→sf 组合矩阵）"
+    severity: FAIL
+    check:
+      type: membership
+      when_key: bl_pbl_physics
+      then_key: sf_sfclay_physics
+      allowed:
+        1:  [1, 91]    # YSU
+        2:  [2]        # MYJ
+        4:  [4]        # QNSE
+        5:  [1, 5]     # MYNN2.5
+        8:  [1, 91]    # BouLac（Phoenix 臂实测 sf=1）
+        12: [1, 91]    # Shin-Hong

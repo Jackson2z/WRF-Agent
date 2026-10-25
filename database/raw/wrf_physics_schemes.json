@@ -1,0 +1,97 @@
+{
+  "description": "WRF physics schemes catalog for urban microclimate/BIPV/UHI research",
+  "version": "1.0.0",
+  "schemes": {
+    "mp_physics": {
+      "description": "Microphysics scheme",
+      "options": {
+        "0": {"name": "No microphysics", "recommended": false},
+        "1": {"name": "Kessler (warm rain)", "recommended": false},
+        "2": {"name": "Lin et al. (Purdue)", "recommended": false},
+        "3": {"name": "WSM3 (simple ice)", "recommended": false},
+        "4": {"name": "WSM5 (mixed phase)", "recommended": false},
+        "5": {"name": "Eta (Ferrier)", "recommended": false},
+        "6": {"name": "WSM6 (graupel)", "recommended": false},
+        "7": {"name": "Goddard GCE", "recommended": false},
+        "8": {"name": "Thompson", "recommended": true, "reason": "Good for warm-season convection, widely validated"},
+        "9": {"name": "Milbrandt 2-mom", "recommended": false},
+        "10": {"name": "Morrison 2-mom", "recommended": false},
+        "11": {"name": "CAM 5.1", "recommended": false},
+        "13": {"name": "SBU-YLin", "recommended": false},
+        "14": {"name": "WDMS 5-class", "recommended": false},
+        "16": {"name": "WDMS 6-class", "recommended": false},
+        "17": {"name": "NSSL 2-mom", "recommended": false},
+        "28": {"name": "Thompson aerosol-aware", "recommended": true, "reason": "Aerosol-aware variant, better for urban environments"}
+      },
+      "default": 8
+    },
+    "cu_physics": {
+      "description": "Cumulus parameterization scheme",
+      "options": {
+        "0": {"name": "None (convection-permitting)", "recommended": true, "reason": "Required when dx <= 3 km (urban-scale domains)"},
+        "1": {"name": "Kain-Fritsch", "recommended": true, "reason": "Recommended for parent domain (d01) when dx > 3 km"},
+        "2": {"name": "Betts-Miller-Janjic", "recommended": false},
+        "3": {"name": "Grell-Freitas", "recommended": false},
+        "5": {"name": "Grell 3D", "recommended": false},
+        "6": {"name": "Tiedtke", "recommended": false},
+        "11": {"name": "Multi-scale KF", "recommended": false},
+        "14": {"name": "New SAS", "recommended": false}
+      },
+      "default": 0
+    },
+    "bl_pbl_physics": {
+      "description": "Planetary boundary layer scheme",
+      "options": {
+        "0": {"name": "No PBL", "recommended": false},
+        "1": {"name": "YSU", "recommended": false},
+        "2": {"name": "MYNN 2.5 level TKE", "recommended": true, "reason": "Best for urban boundary layer, coupled with MYNN surface layer"},
+        "4": {"name": "QNSE-EDMF", "recommended": false},
+        "5": {"name": "MYNN 3rd level TKE", "recommended": false},
+        "6": {"name": "ACM2 (Pleim)", "recommended": false},
+        "7": {"name": "Shin-Hong", "recommended": false},
+        "8": {"name": "BouLac", "recommended": false},
+        "9": {"name": "UW", "recommended": false},
+        "10": {"name": "TEMF", "recommended": false},
+        "12": {"name": "GBM TKE-type", "recommended": false}
+      },
+      "default": 2
+    },
+    "sf_urban_physics": {
+      "description": "Urban canopy model",
+      "options": {
+        "0": {"name": "No urban physics", "recommended": false},
+        "1": {"name": "UCM (single-layer)", "recommended": false},
+        "2": {"name": "BEP (multi-layer)", "recommended": false},
+        "3": {"name": "BEP+BEM (building energy model)", "recommended": true, "reason": "Required for BIPV thermal exchange and building energy balance"}
+      },
+      "default": 3
+    },
+    "ra_sw_physics": {
+      "description": "Shortwave radiation scheme",
+      "options": {
+        "0": {"name": "No SW radiation", "recommended": false},
+        "1": {"name": "Dudhia", "recommended": false},
+        "2": {"name": "Goddard", "recommended": false},
+        "3": {"name": "CAM", "recommended": false},
+        "4": {"name": "RRTMG", "recommended": true, "reason": "Most accurate for solar radiation (critical for BIPV)"},
+        "5": {"name": "New Goddard", "recommended": false},
+        "7": {"name": "GFDL", "recommended": false}
+      },
+      "default": 4
+    },
+    "sf_surface_physics": {
+      "description": "Land surface model",
+      "options": {
+        "0": {"name": "No surface physics", "recommended": false},
+        "1": {"name": "Thermal diffusion", "recommended": false},
+        "2": {"name": "Noah-MP", "recommended": true, "reason": "Multi-parameterization LSM with dynamic vegetation"},
+        "3": {"name": "RUC", "recommended": false},
+        "4": {"name": "Noah-MP (crop model)", "recommended": false},
+        "5": {"name": "CLM4", "recommended": false},
+        "7": {"name": "Pleim-Xiu", "recommended": false},
+        "8": {"name": "SSiB", "recommended": false}
+      },
+      "default": 2
+    }
+  }
+}

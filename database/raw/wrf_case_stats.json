@@ -1,0 +1,127 @@
+{
+  "description": "WRF simulation case templates for urban microclimate/BIPV/UHI studies",
+  "version": "1.0.0",
+  "case_templates": {
+    "urban_uhi_basic": {
+      "name": "Urban Heat Island - Basic",
+      "description": "Single-domain urban UHI simulation with BEP/BEM urban canopy",
+      "solver": "wrf.exe",
+      "domain_type": "single",
+      "physics_preset": "urban_basic",
+      "run_hours": 48,
+      "spinup_hours": 24,
+      "dx": 1000,
+      "nesting": false,
+      "key_variables": ["T2", "U10", "V10", "SWDOWN", "GLW", "HFX", "LH", "GRDFLX", "TSK", "ALBEDO"],
+      "data_source": "ERA5",
+      "recommended_physics": {
+        "mp_physics": 8,
+        "cu_physics": 1,
+        "bl_pbl_physics": 2,
+        "sf_urban_physics": 3,
+        "ra_sw_physics": 4,
+        "ra_lw_physics": 4,
+        "sf_surface_physics": 2
+      }
+    },
+    "urban_uhi_nested": {
+      "name": "Urban Heat Island - Nested Domains",
+      "description": "Two-domain nested simulation for urban microclimate with fine urban resolution",
+      "solver": "wrf.exe",
+      "domain_type": "nested_2",
+      "physics_preset": "urban_nested",
+      "run_hours": 24,
+      "spinup_hours": 12,
+      "dx": [1000, 200],
+      "nesting": true,
+      "parent_grid_ratio": 5,
+      "key_variables": ["T2", "U10", "V10", "SWDOWN", "GLW", "HFX", "LH", "GRDFLX", "TSK", "Q2", "PSFC", "RAINC", "RAINNC"],
+      "data_source": "ERA5",
+      "recommended_physics": {
+        "mp_physics": [8, 8],
+        "cu_physics": [1, 0],
+        "bl_pbl_physics": [2, 2],
+        "sf_urban_physics": [3, 3],
+        "ra_sw_physics": [4, 4],
+        "ra_lw_physics": [4, 4],
+        "sf_surface_physics": [2, 2]
+      }
+    },
+    "bipv_thermal": {
+      "name": "BIPV Thermal Performance",
+      "description": "Building-integrated PV thermal effect simulation with BEP+BEM",
+      "solver": "wrf.exe",
+      "domain_type": "nested_2",
+      "physics_preset": "bipv_thermal",
+      "run_hours": 72,
+      "spinup_hours": 24,
+      "dx": [1000, 200],
+      "nesting": true,
+      "parent_grid_ratio": 5,
+      "key_variables": ["T2", "SWDOWN", "GLW", "HFX", "LH", "GRDFLX", "TSK", "TC_URB", "TR_URB", "TB_URB", "WIND_URB"],
+      "data_source": "ERA5",
+      "special_params": {
+        "sf_urban_physics": 3,
+        "bep_bem_option": 3,
+        "usewudaptlcz": 1
+      },
+      "recommended_physics": {
+        "mp_physics": [8, 8],
+        "cu_physics": [1, 0],
+        "bl_pbl_physics": [2, 2],
+        "sf_urban_physics": [3, 3],
+        "ra_sw_physics": [4, 4],
+        "ra_lw_physics": [4, 4],
+        "sf_surface_physics": [2, 2]
+      }
+    },
+    "street_canyon": {
+      "name": "Street Canyon Ventilation",
+      "description": "High-resolution street canyon ventilation and pollutant dispersion",
+      "solver": "wrf.exe",
+      "domain_type": "nested_3",
+      "physics_preset": "street_canyon",
+      "run_hours": 24,
+      "spinup_hours": 6,
+      "dx": [1000, 200, 40],
+      "nesting": true,
+      "parent_grid_ratio": [1, 5, 5],
+      "key_variables": ["U10", "V10", "W", "TKE_PBL", "HFX", "UST", "T2"],
+      "data_source": "ERA5",
+      "notes": "Innermost domain at 40m resolution requires building-height resolving. Use with LES PBL option for best results.",
+      "recommended_physics": {
+        "mp_physics": [8, 8, 8],
+        "cu_physics": [1, 0, 0],
+        "bl_pbl_physics": [2, 2, 2],
+        "sf_urban_physics": [3, 3, 3],
+        "ra_sw_physics": [4, 4, 4],
+        "ra_lw_physics": [4, 4, 4],
+        "sf_surface_physics": [2, 2, 2]
+      }
+    },
+    "solar_potential": {
+      "name": "Urban Solar Potential Assessment",
+      "description": "Assess solar energy potential with RRTMG radiation and urban morphology",
+      "solver": "wrf.exe",
+      "domain_type": "nested_2",
+      "physics_preset": "solar",
+      "run_hours": 24,
+      "spinup_hours": 12,
+      "dx": [1000, 200],
+      "nesting": true,
+      "parent_grid_ratio": 5,
+      "key_variables": ["SWDOWN", "SWDIF", "SWDDIR", "COSZEN", "SWUPB", "ALBEDO", "T2", "U10", "V10"],
+      "data_source": "ERA5",
+      "recommended_physics": {
+        "mp_physics": [8, 8],
+        "cu_physics": [1, 0],
+        "bl_pbl_physics": [2, 2],
+        "sf_urban_physics": [3, 3],
+        "ra_sw_physics": [4, 4],
+        "ra_lw_physics": [4, 4],
+        "sf_surface_physics": [2, 2]
+      },
+      "notes": "Use swint_opt=1 for solar radiation diagnostics. Requires high temporal output (history_interval <= 30 min)."
+    }
+  }
+}
