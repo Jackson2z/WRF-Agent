@@ -1,47 +1,47 @@
-# resume_contract.yaml — 跨机迁移续跑契约（v1.0）
-# 权威定义: 6 件套清单/校验规则/已知坑位/验收门禁（工具箱通用版; 项目实例可覆盖阈值）
-# 消费方: wrf-kit case resume-pack/fetch/preflight/watch/accept 五步
-# 来源: wrf-migrate-resume skill (2026-08-23 chicago 战役) + ctl@030 战役补强 (2026-08-26)
-# 原则: resume.py 代码只留机制, 清单与阈值全部读本文件
+# resume_contract.yaml — contract for resuming a run on another machine (v1.0)
+# Defines the six required files, the integrity checks, known pitfalls and the acceptance gate (generic; a case may override thresholds)
+# Used by the five resume steps: resume-pack / fetch / preflight / watch / accept
+# Derived from two resumed production runs (2026-08)
+# Principle: resume.py holds only the mechanism; every list and threshold is read from this file
 
 contract_version: "1.0"
 date_frozen: 2026-08-26
 
-# ---- 6 件套（迁移必需清单; 缺一 preflight BLOCK）----
+# ---- the six required files (preflight blocks if any is missing) ----
 required_pieces:
-  wrfrst_d01: {desc: "d01 重启态", from: run_dir, critical: true}
-  wrfrst_d02: {desc: "d02 重启态", from: run_dir, critical: true}
-  wrfrst_d03: {desc: "d03 重启态", from: run_dir, critical: true}
-  wrfbdy_d01: {desc: "外强迫(场景无关)", from: "run_dir 或 wps_dir symlink", critical: true,
-               note: "缺 → 目标机 FATAL med_latbound_in IERR=-1021"}
-  namelist_input: {desc: "含 resume=true 窗口", from: run_dir, critical: true}
-  urbparm: {desc: "场景城市参数表", from: "run 目录 roof_pv 版 → 现表 → 上级 roof_pv 版", critical: true,
+  wrfrst_d01: {desc: "d01 restart state", from: run_dir, critical: true}
+  wrfrst_d02: {desc: "d02 restart state", from: run_dir, critical: true}
+  wrfrst_d03: {desc: "d03 restart state", from: run_dir, critical: true}
+  wrfbdy_d01: {desc: "lateral boundary conditions (independent of the scenario)", from: "run_dir or a symlink to wps_dir", critical: true,
+               note: "missing -> FATAL med_latbound_in IERR=-1021 on the target machine"}
+  namelist_input: {desc: "with restart=.true. and the resumed window", from: run_dir, critical: true}
+  urbparm: {desc: "urban parameter table of the scenario", from: "roof_pv copy in the run directory -> current table -> roof_pv copy in the parent", critical: true,
             probe_chain: ["URBPARM.TBL.roof_pv", "URBPARM.TBL", "../URBPARM.TBL.roof_pv"]}
 
-# ---- 传输完整性 ----
+# ---- transfer integrity ----
 integrity:
-  size_check: true          # stat 字节级核对（S3 截断防御; pitfall: wrfrst 少 1405B → netCDF Errno -51）
-  md5_spotcheck_n: 2        # 抽查文件数（resume-fetch 时）
+  size_check: true          # byte-level size comparison (guards against truncated object-store downloads; a wrfrst short by 1405 B gives netCDF Errno -51)
+  md5_spotcheck_n: 2        # number of files spot-checked by md5 during resume-fetch
   s3_truncate_min_bytes: 1024
 
-# ---- 目标机组装 ----
+# ---- assembly on the target machine ----
 staging:
-  runtime_datalinks_from: "wrf 安装 run 目录批量软链（排除 URBPARM.TBL 场景自有）"
-  urbparm_scenario_rule: "scen=roof_pv 且无现表 → 用 URBPARM.TBL.roof_pv"
-  bdy_end_rule: "bdy 末条 = end − 6h；缺则重跑 real（禁止盲跑）"
+  runtime_datalinks_from: "symlink the run-time tables from the WRF install run directory (except URBPARM.TBL, which belongs to the scenario)"
+  urbparm_scenario_rule: "scen=roof_pv and no current table -> use URBPARM.TBL.roof_pv"
+  bdy_end_rule: "last boundary time = end - 6 h; if it is short, re-run real.exe (never resume blindly)"
 
-# ---- 验收门禁（resume-watch/accept）----
+# ---- acceptance gate (resume-watch / accept) ----
 acceptance:
-  frames_expected: 577            # 全窗（原跑+续跑合并）
+  frames_expected: 577            # whole window (original and resumed segments combined)
   interval_minutes: 20
-  grid_continuity: true           # 20min 网格门禁（重叠帧去重后）
-  overlap_dedup: "续跑与原跑重叠帧以 wrfrst 起点切分"
-  window_check: "首帧=window_start 末帧=window_end"
+  grid_continuity: true           # 20-min output grid has no gaps (after overlapping frames are removed)
+  overlap_dedup: "frames where the resumed and original segments overlap are split at the restart time"
+  window_check: "first frame = window_start, last frame = window_end"
   success_marker: "SUCCESS COMPLETE WRF"
 
-# ---- 已知坑位表（preflight 反查）----
+# ---- known pitfalls (matched during preflight) ----
 pitfalls:
-  - {id: pit1, pattern: "Errno -51|netCDF 错误", cause: "S3 下载截断", fix: "重传该件, size_check 拦截"}
-  - {id: pit2, pattern: "IERR=-1021|med_latbound_in", cause: "wrfbdy_d01 漏", fix: "补 6 件套 wrfbdy"}
-  - {id: pit3, pattern: "bdy 时间不足", cause: "bdy 末条 < end-6h", fix: "重跑 real (禁止直接续)"}
-  - {id: pit4, pattern: "城市参数漂移", cause: "URBPARM 用错场景", fix: "probe_chain 重选 + diff 确认"}
+  - {id: pit1, pattern: "Errno -51|netCDF error", cause: "truncated download", fix: "transfer the file again; size_check catches it"}
+  - {id: pit2, pattern: "IERR=-1021|med_latbound_in", cause: "wrfbdy_d01 missing", fix: "add wrfbdy_d01 from the six required files"}
+  - {id: pit3, pattern: "boundary time too short", cause: "last boundary time < end - 6 h", fix: "re-run real.exe (do not resume directly)"}
+  - {id: pit4, pattern: "urban parameter drift", cause: "URBPARM table of the wrong scenario", fix: "re-select with probe_chain and confirm with diff"}

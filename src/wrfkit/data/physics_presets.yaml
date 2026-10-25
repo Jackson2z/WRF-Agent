@@ -67,8 +67,8 @@ presets:
       history_interval: [30, 30]
     notes: "Same as BIPV + swint_opt=1 for diagnostics, history_interval <= 30 min"
 
-  hk-rpv:
-    description: "HK_RPV 产线预设（3 域 4.5/1.5/0.5km，BEP+BEM 仅 d03）"
+  urban-3dom-500m:
+    description: "urban production preset (3 domains 4.5/1.5/0.5 km; BEP+BEM requested for d03 only)"
     domains: 3
     dx_km: [4.5, 1.5, 0.5]
     physics:
@@ -86,6 +86,6 @@ presets:
       radt: [9, 3, 1]
       cudt: [5, 0, 0]
     notes: >-
-      由 2026-10-22 真实 namelist 反推（HK_RPV richeng_revision_round3 M1_albedo_pairs，8 个算例
-      mp=3/ra=1/pbl=8/urban=0,0,3 全一致）。cu 粗域开 Kain-Fritsch、d02/d03 关；
-      num_land_cat=61，e_vert=51（不在 Exergy 45/60 矩阵内，已同步加入 axis_rules allowed）。
+      derived from 8 real namelists of an urban production batch (2026-10-22;
+      mp=3/ra=1/pbl=8/urban=0,0,3 in all of them). Cumulus on the coarse domain (Kain-Fritsch), off on d02/d03;
+      num_land_cat=61, e_vert=51 (outside the 45/60 set; added to axis_rules allowed).

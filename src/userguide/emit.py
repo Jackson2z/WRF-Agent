@@ -14,6 +14,7 @@ Principles (paper §Methods):
 from __future__ import annotations
 
 import datetime as dt
+import functools
 import hashlib
 from pathlib import Path
 
@@ -56,7 +57,7 @@ def _values(spec: dict) -> tuple[dict, dict, int]:
     fm = _y(HERE / "field_map.yaml")
     design_ids = [k for k, v in fm["fields"].items() if v.get("class") == "design"]
     design = {k: v.get("value") if isinstance(v, dict) else v for k, v in (spec.get("design") or {}).items()}
-    rep = checks.run(design, design_ids)
+    rep = checks.run(design, design_ids, startup=False)   # emit evaluates WRF's start-up checks itself, below
     failed = [r for r in rep["rules"] if r["status"] == "FAIL"]
     d = checks.normalise(design)
     for k, v in (rep.get("derived") or {}).items():
@@ -82,7 +83,13 @@ def _values(spec: dict) -> tuple[dict, dict, int]:
 
 
 def _registry_meta() -> dict:
-    reg = _y(REGISTRY) or {}
+    # the registry snapshot is large (~6 s to parse); reuse it until the file changes
+    return _registry_meta_at(str(REGISTRY), REGISTRY.stat().st_mtime_ns if REGISTRY.exists() else 0)
+
+
+@functools.lru_cache(maxsize=2)
+def _registry_meta_at(path: str, mtime_ns: int) -> dict:
+    reg = _y(Path(path)) or {}
     return {f"wps:{r['name']}" if r["file"] == "namelist.wps" else f"input:{r['name']}":
             {"block": r["block"], "default": r.get("default"), "per_domain": r.get("per_domain")}
             for r in reg.get("fields", [])}
@@ -209,10 +216,13 @@ def emit(spec: dict, out_dir: Path, force: bool = False) -> dict:
                "decided": sc["decided"], "undecidable": sc["undecidable"],
                "refusals": [{"line": r["line"], "message": r["message"]} for r in sc["refusals"]],
                "rewrites_of_written_values": [{"line": r["line"], "target": r["target"], "domains": r["domains"],
-                                              "printed_at_default": r["printed_at_default"]}
+                                              "printed_at_default": r["printed_at_default"],
+                                              "replaces_study_defining": r["replaces_study_defining"]}
                                              for r in sc["rewrites_of_written_values"]]}
+    # a rewrite of a study-defining value means wrf.exe would run a different experiment than the one specified
     verdict = ("REFUSED_BY_MODEL" if startup["refusals"] else
-               "COMPLETE" if not all_missing and not unplaced else "INCOMPLETE")
+               "REWRITTEN_BY_MODEL" if any(r["replaces_study_defining"] for r in startup["rewrites_of_written_values"])
+               else "COMPLETE" if not all_missing and not unplaced else "INCOMPLETE")
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),

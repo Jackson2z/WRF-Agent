@@ -93,3 +93,16 @@ def test_draft_tool_refuses_a_per_domain_urban_scheme(case):
     assert not (case / "draft.yaml").exists()          # nothing was written
     ok = agent_tools.set_draft(case, {"input:sf_urban_physics": {"value": "3", "reason": "BEP everywhere"}})
     assert ok["accepted"] is True
+
+
+def test_draft_tool_accepts_per_domain_values_sent_as_a_list(case):
+    """A list [1, 0, 0] means the same as "1,0,0": it must be judged by its values, not by its printed form."""
+    from src.userguide import agent_tools
+    assert agent_tools.set_draft(case, {"input:cu_physics": {"value": [1, 0, 0], "reason": "outer domain only"}})["accepted"]
+    assert agent_tools.set_draft(case, {"input:sf_urban_physics": {"value": [3, 3, 3], "reason": "BEP everywhere"}})["accepted"]
+    stored = yaml.safe_load((case / "draft.yaml").read_text())["design"]
+    assert stored["input:cu_physics"]["value"] == "1,0,0"        # stored as the namelist text
+    out = agent_tools.set_draft(case, {"input:sf_urban_physics": {"value": [0, 0, 3], "reason": "urban only inland"}})
+    assert out["accepted"] is False and "one value for every domain" in out["error"]
+    out = agent_tools.set_draft(case, {"input:cu_physics": {"value": [1, 2, 0], "reason": "x"}})
+    assert out["accepted"] is False and "inner domains repeat d01 or use 0" in out["error"]

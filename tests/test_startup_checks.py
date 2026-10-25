@@ -44,3 +44,31 @@ def test_runtime_decomposition_is_undecidable_not_refused():
     r = SC.check_design(MF.VALID)
     lines = {u["line"] for u in r["undecided"]}
     assert 2989 in lines and 2989 not in {x["line"] for x in r["refusals"]}
+
+
+def test_compile_gate_runs_wrfs_start_up_checks():
+    from src.userguide import checks
+    r = checks.run(MF.VALID, list(MF.VALID))
+    assert r["verdict"] == "PASS"
+    assert [x["status"] for x in r["rules"] if x["rule"] == "wrf_startup_checks"] == ["PASS"]
+
+
+def test_compile_gate_fails_when_wrf_would_rewrite_a_study_defining_value(monkeypatch):
+    from src.userguide import checks
+    fake = {"release": "4.6.1", "statements": 1, "decided": 1, "undecidable": 0, "refusals": [],
+            "rewrites_of_written_values": [{"line": 1061, "target": "sf_urban_physics", "printed_at_default": False,
+                                            "replaces_study_defining": True,
+                                            "domains": [{"domain": 1, "from": 0, "to": 3}]}]}
+    monkeypatch.setattr(SC, "check_design", lambda design: fake)
+    r = checks.run(MF.VALID, list(MF.VALID))
+    hit = [x for x in r["rules"] if x["rule"] == "wrf_startup_rewrite"]
+    assert r["verdict"] == "FAIL" and hit[0]["status"] == "FAIL" and ":1061" in hit[0]["detail"]
+
+
+def test_emit_does_not_recurse_into_the_compile_gate(monkeypatch):
+    from src.userguide import checks
+    calls = []
+    real = checks.run
+    monkeypatch.setattr(checks, "run", lambda *a, **k: calls.append(k.get("startup", True)) or real(*a, **k))
+    SC.emitted_namelist(MF.VALID)
+    assert calls and not any(calls)

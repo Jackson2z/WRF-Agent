@@ -81,6 +81,11 @@ FAULTS = [
     ("domain_constraint", "land surface differs per domain", {"input:sf_surface_physics": "2,1,1"}, "FAIL"),
     ("domain_constraint", "long-wave radiation differs per domain", {"input:ra_lw_physics": "4,1,1"}, "FAIL"),
     ("domain_constraint", "short-wave radiation differs per domain", {"input:ra_sw_physics": "4,1,1"}, "FAIL"),
+    # added 2026-10-25 with the start-up-check gate: WRF's own verdict on the generated namelist
+    ("wrf_startup_refusal", "wrf.exe refuses a surface layer that differs per domain", {"input:sf_sfclay_physics": "2,1,1"},
+     "FAIL"),
+    ("wrf_startup_rewrite", "wrf.exe rewrites the urban option on the outer domains", {"input:sf_urban_physics": "0,0,3"},
+     "FAIL"),
 ]
 
 # Positive tests for rules the valid specification does not exercise (it only enables options they never see).
@@ -379,8 +384,8 @@ def main(argv=None) -> int:
               "| property | holds |", "|---|---|"]
     for k, v in edits.items():
         lines.append(f"| {k.replace('_', ' ')} | {'yes' if v else 'NO'} |")
-    lines += ["", f"- Re-emission byte-identical: **{generation['identical']}** "
-                  f"({', '.join(f'{k}: {v['sha256'][:12]}' for k, v in generation['files'].items())})",
+    shas = ", ".join(f"{k}: {v['sha256'][:12]}" for k, v in generation["files"].items())
+    lines += ["", f"- Re-emission byte-identical: **{generation['identical']}** ({shas})",
               f"- Provenance complete: **{generation['provenance_complete']}** across "
               f"{generation['params_emitted']} emitted parameters"]
     cov = startup["coverage"]

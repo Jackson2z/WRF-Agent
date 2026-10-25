@@ -168,6 +168,8 @@ def discuss(case: Path, client=None, model=None, specialists=None, allow_single=
                     if len({a.get("id") for a in alts}) != len(alts):
                         raise DiscussionError("alternative ids must be unique")
                     for a in alts:
+                        if not isinstance(a, dict):
+                            raise DiscussionError("every alternative must be an object")
                         if not a.get("id"):
                             raise DiscussionError("every alternative needs an id")
                         _design(a.get("design"), ids, require_all=True)

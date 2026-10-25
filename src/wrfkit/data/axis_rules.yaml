@@ -1,34 +1,34 @@
-# axis_rules.yaml — Exergy-city 15 轴设计空间提交门禁（v4 轴系规则化）
-# 消费方: wrf_kit/namelist_gate.py（通用引擎）
-# 口径: 与 dimensions/registry.yaml + design_space_master_plan_20260913.md 同源
-# 分级: FAIL=拦提交 · WARN=提示声明义务 · INFO=滞后轴（记录不拦）
-# 物理范围规则（0-1 等）拦"非法值"；实验档位（如 α 4 档）是设计选择，不做提交拦截。
+# axis_rules.yaml — submission gate for a 15-axis urban design space
+# Used by: wrf_kit/namelist_gate.py (generic engine)
+# Axis definitions follow the design-space registry of the study
+# Levels: FAIL = blocks submission · WARN = must be declared · INFO = deferred axis (recorded, not blocked)
+# Physical range rules (0-1 and so on) block invalid values; experimental levels (such as four albedo levels) are design choices and are not blocked.
 
-source: namelist   # 主解析目标 = namelist.input；urbparm 轴见 source: urbparm_table 段
+source: namelist   # primary target = namelist.input; URBPARM axes are under source: urbparm_table
 
 rules:
-  # ── namelist.input 轴 ──
+  # ── namelist.input axes ──
   - id: axis6_evert
-    description: "轴6 e_vert 冠层竖层：合法值 45/60（chengdu 对齐验证过）+ 51（HK_RPV 产线，2026-10-22 实测）"
+    description: "axis 6 e_vert vertical levels: allowed 45/60 (verified) and 51 (used in a production case)"
     severity: FAIL
     check:
       type: membership
       when_key: e_vert
-      then_key: e_vert          # 自映射：取值须在 allowed 全集（validator 特例：allowed 为扁平档位表时检查 e_vert 本身）
+      then_key: e_vert          # self-mapping: the value must be in the allowed set (validator special case: when allowed is a flat list, e_vert itself is checked)
       allowed:
         45: [45]
-        51: [51]               # HK_RPV 线：e_vert=51（真 namelist 核对，原先被静默跳过）
+        51: [51]               # e_vert = 51 (checked against a real namelist; previously skipped silently)
         60: [60]
   - id: axis7_dx_d03
-    description: "轴7 d03 分辨率：1km 主线（500m 属 M08/M06 特例，dirty 需声明）"
+    description: "axis 7 d03 resolution: 1 km by default (500 m is a special case and must be declared)"
     severity: WARN
     check:
       type: range
-      key: dx                   # namelist dx= 为三元组，parse 取首值 d01；d03 校验走 urbparm 段备注
+      key: dx                   # dx is per domain; parse takes the first value (d01); the d03 check is noted in the urbparm section
       min: 100
       max: 10000
   - id: axis9_pbl_sfclay
-    description: "轴9 PBL×表面层组合兼容"
+    description: "axis 9 compatible PBL and surface-layer combination"
     severity: FAIL
     check:
       type: membership
@@ -41,40 +41,40 @@ rules:
         8:  [1, 91]
         12: [1, 91]
 
-  # ── URBPARM.TBL 轴（engine source=urbparm_table）──
+  # ── URBPARM.TBL axes (engine source=urbparm_table) ──
   - id: axis1_albr_roof
-    description: "轴1 屋面反照率：物理界 [0,1]"
+    description: "axis 1 roof albedo: physical range [0,1]"
     severity: FAIL
     source: urbparm_table
     parse_file: URBPARM.TBL
     check: {type: range, key: ALBR, min: 0.0, max: 1.0}
   - id: axis2_albr_wall
-    description: "轴2 墙面反照率：物理界 [0,1]"
+    description: "axis 2 wall albedo: physical range [0,1]"
     severity: FAIL
     source: urbparm_table
     parse_file: URBPARM.TBL
     check: {type: range, key: ALBB, min: 0.0, max: 1.0}
   - id: axis3_pv_frac
-    description: "轴3 PV_FRAC 覆盖率：物理界 [0,1]"
+    description: "axis 3 PV_FRAC coverage: physical range [0,1]"
     severity: FAIL
     source: urbparm_table
     parse_file: URBPARM.TBL
     check: {type: range, key: PV_FRAC_ROOF, min: 0.0, max: 1.0}
 
-  # ── 滞后轴（源码级，INFO 记录不拦——解禁时升 FAIL 并补 parse_file: 源码参数）──
+  # ── deferred axes (source-code level; INFO, recorded not blocked — when enabled, raise to FAIL and add parse_file for the source parameter) ──
   - id: axis11_eta_pv
-    description: "轴11 η_PV 器件效率（源码 effpv=0.19；编译级——滞后）"
+    description: "axis 11 PV efficiency eta_PV (source effpv=0.19; compile-time, deferred)"
     severity: INFO
     check: {type: required, keys: []}
   - id: axis12_alpha_pv
-    description: "轴12 α_PV 板面反照率（源码 albpv=0.11；编译级——滞后）"
+    description: "axis 12 PV panel albedo alpha_PV (source albpv=0.11; compile-time, deferred)"
     severity: INFO
     check: {type: required, keys: []}
   - id: axis13_gap
-    description: "轴13 安装间隙（源码未参数化——滞后）"
+    description: "axis 13 mounting gap (not parameterised in the source; deferred)"
     severity: INFO
     check: {type: required, keys: []}
   - id: axis14_gamma
-    description: "轴14 γ 温度系数（源码 0.005——滞后）"
+    description: "axis 14 temperature coefficient gamma (source 0.005; deferred)"
     severity: INFO
     check: {type: required, keys: []}

@@ -122,7 +122,32 @@ def normalise(design: dict) -> dict:
     return out
 
 
-def run(design: dict, design_ids: list[str]) -> dict:
+def _startup_rules(design: dict, add) -> None:
+    from . import startup_checks
+
+    try:
+        sc = startup_checks.check_design(design)
+    except Exception as exc:  # noqa: BLE001 - the namelist cannot be generated yet; never a pass
+        add("wrf_startup_refusal", "DEFERRED", [], f"start-up checks not evaluated: {type(exc).__name__}: {exc}")
+        return
+    where = f"WRF {sc['release']} {CAM}"
+    for r in sc["refusals"]:
+        add("wrf_startup_refusal", "FAIL", [f"input:{r['target']}"] if r.get("target") else [],
+            f"wrf.exe would stop ({where}:{r['line']}): {r['message']}")
+    for r in sc["rewrites_of_written_values"]:
+        moves = ", ".join(f"d{d['domain'] or 1} {d['from']}->{d['to']}" for d in r["domains"])
+        what = (f"wrf.exe would rewrite {r['target']} ({moves}) at {where}:{r['line']}"
+                + ("" if r["printed_at_default"] else "; not printed at debug_level 0"))
+        if r["replaces_study_defining"]:
+            add("wrf_startup_rewrite", "FAIL", [f"input:{r['target']}"], what)
+        else:
+            add("wrf_startup_rewrite", "WARN", [f"input:{r['target']}"], what)
+    if not sc["refusals"] and not sc["rewrites_of_written_values"]:
+        add("wrf_startup_checks", "PASS", [], f"{sc['decided']} of {sc['statements']} start-up checks decided, "
+                                             f"none refuses or rewrites a written value ({sc['undecidable']} undecidable)")
+
+
+def run(design: dict, design_ids: list[str], startup: bool = True) -> dict:
     d = normalise(design)
     res: list[dict] = []
 
@@ -283,6 +308,12 @@ def run(design: dict, design_ids: list[str]) -> dict:
         "with 20 or fewer input levels wrf.exe rewrites lagrange_order to 1 "
         f"({CAM}:1041); the count is read from met_em at Launch")
     add("land_cat_match", "DEFERRED", ["input:num_land_cat"], "read from geo_em files at Launch")
+
+    # WRF's own start-up checks on the namelist this design would produce: a refusal stops wrf.exe, and a rewrite of a
+    # study-defining value means wrf.exe would run a different experiment than the one approved. Evaluated even when
+    # another rule already failed, so the report also states what WRF itself would do with this design.
+    if startup:
+        _startup_rules(design, add)
 
     verdict = "FAIL" if any(r["status"] == "FAIL" for r in res) else "PASS"
     return {"verdict": verdict, "rules": res, "derived": derived}

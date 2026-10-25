@@ -65,8 +65,8 @@ python -m pytest -q
 |---|---|
 | start-up checks extracted from `module_check_a_mundo.F` | 97 refusals / 278 rewrites (4.6.1); 95 / 21 printed at the default debug level |
 | rewrites that replace a study-defining value | 21 statements on 9 parameters, 4 of them announced |
-| rule inventory (checks.py) | 24 ids: 17 enforcing, 4 informational, 3 deferred to launch |
-| single-field fault injection | 27/27 detected with the expected status |
+| rule inventory (checks.py) | 27 ids: 19 enforcing, 5 informational, 3 deferred to launch |
+| single-field fault injection | 29/29 detected with the expected status |
 | approval binding | 5/5 post-approval edits invalidate approval; 3/3 non-edits keep it |
 | generation | byte-identical re-emission; 111/111 parameters carry a source |
 | start-up checks decidable before the run | refusals 78/85, rewrites 241/268 (this build) |
@@ -100,7 +100,7 @@ emission plus a submission *plan*), and any WRF runtime.
 
 ## Citation
 
-See `CITATION.cff`. A paper describing the configuration-fidelity study is in preparation.
+See `CITATION.cff`. A paper describing the configuration-fidelity study is under review.
 
 ## License
 

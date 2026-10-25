@@ -1,24 +1,24 @@
 metadata:
   source: >-
     DOE/sensitivity baseline-consistency
-    (2026-07-28 DOE 11类URBPARM误用教训,
-    feedback_doe_urbparm_baseline_mismatch)
+    (lesson from a 2026-07-28 sensitivity design in which an 11-class URBPARM table was used by mistake
+    and ALBR, AH and other keys drifted silently)
   description: >-
-    DOE/sensitivity run vs baseline 配置一致性, sbatch 前硬卡口.
+    configuration consistency of sensitivity runs against the baseline, a hard check before sbatch.
 
 experiment_config_consistency:
   severity: CRITICAL
   urbparm:
     description: >-
-      URBPARM.TBL 只允许实验变量漂移, 其他全必须 match baseline.
-      防止 3-class WRF URBPARM.TBL 被替换成 11-class LCZ 表后
-      ALBR/AH 等全部静默漂移.
+      URBPARM.TBL may differ only in the experimental variables; everything else must match the baseline.
+      Prevents the 3-class WRF URBPARM.TBL being replaced by an 11-class LCZ table
+      with ALBR/AH and the rest drifting silently.
     allowed_drift_keys: [ALBR, ALBB]
     must_match_others: true
     must_match_num_categories: true
   namelist:
     description: >-
-      namelist 物理/domain 必须与 baseline 逐字一致.
+      namelist physics/domain settings must match the baseline exactly.
     must_match_sections:
       physics:
         - sf_urban_physics

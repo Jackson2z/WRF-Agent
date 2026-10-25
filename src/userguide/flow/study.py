@@ -13,6 +13,7 @@ study_record.yaml. Metrics come from deliberation_metrics; nothing is judged by 
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -35,7 +36,10 @@ def _make_case(case: Path, request: str) -> Path:
 
 def arm_multi(case: Path, client, model) -> dict:
     rec = discussion.discuss(case, client=client, model=model)
-    first = sorted(a["id"] for a in rec.get("synthesis", {}).get("alternatives", []))[0]
+    alts = rec.get("synthesis", {}).get("alternatives", [])
+    if rec.get("status") != "complete" or not alts:
+        raise discussion.DiscussionError("discussion incomplete: " + str(rec.get("error", "no alternatives"))[:120])
+    first = sorted(a["id"] for a in alts)[0]
     discussion.select(case, first)          # A is chosen by id, not by reading the designs
     return {"discussion": rec, "alternative": first}
 
@@ -83,6 +87,14 @@ def run_trial(request: str, arms=("multi", "single", "oneshot"), client=None, mo
               root: Path | None = None, trial_id: str = "t00") -> dict:
     """One request through every arm; returns the row appended to study_record.yaml."""
     root = root or Path(tempfile.mkdtemp(prefix="delib_"))
+    if client is None:
+        from .. import chat
+        from openai import OpenAI
+        client = OpenAI(base_url=chat.settings()["base_url"],
+                        api_key=os.environ.get("WRF_AGENT_LLM_API_KEY") or "none")
+    if model is None:
+        from .. import chat
+        model = chat.settings()["model"]
     row: dict = {"trial": trial_id, "request": request[:400], "model": model, "arms": {}}
     for arm in arms:
         case = root / trial_id / arm

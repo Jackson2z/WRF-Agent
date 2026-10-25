@@ -9,7 +9,7 @@ microphysics:
     - id: 3
       name: WSM3
       feature: single-moment 3-class (simplified ice)
-      use_case: "HK_RPV 产线默认：跨境长算例用轻量方案换速度（2026-10-22 真 namelist 核对：全部 8 个 M1 算例 mp_physics=3）"
+      use_case: "default for long urban production runs: a light scheme for speed (all 8 namelists of the 2026-10-22 batch use mp_physics=3)"
     - id: 6
       name: WSM6
       feature: graupel
@@ -102,7 +102,7 @@ urban:
     - id: 0
       name: None (no urban canopy)
       feature: off
-      use_case: "粗域 d01/d02 常态：只有最内层开 BEP+BEM；HK_RPV / Exergy 实测 sf_urban_physics=0,0,3"
+      use_case: "often requested only on the innermost domain (0,0,3), but WRF start-up rewrites it to every domain with urban cells; write the value for all domains"
     - id: 1
       name: Single-layer UCM
       feature: simple urban canopy

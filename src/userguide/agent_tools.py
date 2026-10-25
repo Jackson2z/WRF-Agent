@@ -88,6 +88,11 @@ def set_request(case: Path, text: str) -> dict:
     return {"ok": True}
 
 
+def _domain_text(v):
+    """A per-domain value as the comma-separated text the draft stores; models often send a list [1, 0, 0]."""
+    return ",".join(str(x).strip() for x in v) if isinstance(v, (list, tuple)) else v
+
+
 @dashboard.case_write
 def set_draft(case: Path, values: dict, note: str = "") -> dict:
     ids = set(design_ids())
@@ -100,13 +105,13 @@ def set_draft(case: Path, values: dict, note: str = "") -> dict:
             continue
         v = values[fid]
         v = v.get("value") if isinstance(v, dict) else v
-        parts = [x.strip() for x in str(v).split(",") if x.strip()]
+        parts = checks._list(v)          # one entry per domain, whether the value came as a list or as "1,0,0"
         if con["kind"] == "same_all_domains" and len(set(parts)) > 1:
             return {"accepted": False, "field": fid,
                     "error": f"{fid.split(':')[1]} must be one value for every domain — {con['because']} "
                              f"({con['source']}). Write a single value, not {v}.",
-                    "suggestion": parts[-1]}
-        if con["kind"] == "equal_or_zero" and parts and any(x not in (parts[0], "0") for x in parts[1:]):
+                    "suggestion": str(parts[-1])}
+        if con["kind"] == "equal_or_zero" and parts and any(x not in (parts[0], 0) for x in parts[1:]):
             return {"accepted": False, "field": fid,
                     "error": f"{fid.split(':')[1]}: inner domains repeat d01 or use 0 — {con['because']} "
                              f"({con['source']}); got {v}"}
@@ -114,7 +119,7 @@ def set_draft(case: Path, values: dict, note: str = "") -> dict:
     draft.setdefault("design", {})
     for k, v in values.items():
         v = v if isinstance(v, dict) else {"value": v}
-        draft["design"][k] = {"value": v.get("value"), "reason": v.get("reason") or ""}
+        draft["design"][k] = {"value": _domain_text(v.get("value")), "reason": v.get("reason") or ""}
     _w(case / "draft.yaml", draft,
        "# Agent draft (stage 2: Decompose). Values and reasons proposed by the agent; the user approves in Review.\n")
     from .flow.actions import gate_draft_ready, invalidate_approval

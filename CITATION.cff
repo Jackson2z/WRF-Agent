@@ -1,14 +1,13 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below. A paper describing it is in preparation."
-title: "WRF-Agent (public preview)"
+message: "If you use this software, please cite it as below. A paper describing it is under review."
+title: "WRF-Agent"
 authors:
   - name: "WRF-Agent Team"
-version: "0.2.0-preview"
-date-released: "2026-10-25"
+version: "1.0.0"
+date-released: "2026-10-26"
 description: >-
   Configuration fidelity tooling for WRF experiment batches: an audit of the start-up consistency checks of WRF,
   rule checks on an experiment specification, and deterministic namelist generation with per-parameter provenance.
-  Testing-stage subset of a larger code base.
 keywords:
   - WRF
   - configuration

@@ -1,7 +1,7 @@
 {
  "constraints": {
   "valid_spec_verdict": "PASS",
-  "rule_kinds": 17,
+  "rule_kinds": 18,
   "kinds": [
    "cfl_timestep",
    "domain_min_100",
@@ -19,10 +19,11 @@
    "urban_noah",
    "urbparm_effective",
    "vertical_grid_distinct",
-   "wps_wrf_same_source"
+   "wps_wrf_same_source",
+   "wrf_startup_checks"
   ],
-  "faults": 27,
-  "caught": 27,
+  "faults": 29,
+  "caught": 29,
   "rows": [
    {
     "rule": "ratio_odd",
@@ -74,7 +75,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "evert_min",
@@ -128,7 +131,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_rewrite"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -141,7 +146,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "urban_noah",
@@ -155,7 +162,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_rewrite"
+    ]
    },
    {
     "rule": "cam_full_sbm",
@@ -168,7 +177,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "cam_build_dependent",
@@ -181,7 +192,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "date_format",
@@ -276,7 +289,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "cam_build_dependent",
@@ -315,7 +330,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_rewrite"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -328,7 +345,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -341,7 +360,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -354,7 +375,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -367,7 +390,9 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
    },
    {
     "rule": "domain_constraint",
@@ -380,7 +405,39 @@
     "detected": "FAIL",
     "caught": true,
     "case_verdict": "FAIL",
-    "collateral": []
+    "collateral": [
+     "wrf_startup_refusal"
+    ]
+   },
+   {
+    "rule": "wrf_startup_refusal",
+    "test": "negative",
+    "fault": "wrf.exe refuses a surface layer that differs per domain",
+    "mutation": {
+     "input:sf_sfclay_physics": "2,1,1"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": [
+     "domain_constraint"
+    ]
+   },
+   {
+    "rule": "wrf_startup_rewrite",
+    "test": "negative",
+    "fault": "wrf.exe rewrites the urban option on the outer domains",
+    "mutation": {
+     "input:sf_urban_physics": "0,0,3"
+    },
+    "expected": "FAIL",
+    "detected": "FAIL",
+    "caught": true,
+    "case_verdict": "FAIL",
+    "collateral": [
+     "domain_constraint"
+    ]
    }
   ],
   "positives": [
@@ -399,13 +456,13 @@
    }
   ],
   "inventory": {
-   "rules": 24,
+   "rules": 27,
    "by_class": {
-    "enforcing": 17,
-    "informational": 4,
+    "enforcing": 19,
+    "informational": 5,
     "deferred": 3
    },
-   "enforcing_with_positive_and_negative": 17,
+   "enforcing_with_positive_and_negative": 19,
    "enforcing_gaps": [],
    "rows": [
     {
@@ -708,6 +765,44 @@
      "positive_basis": "evaluated on the valid specification",
      "negative": false,
      "unreachable": null
+    },
+    {
+     "rule": "wrf_startup_checks",
+     "statuses": [
+      "PASS"
+     ],
+     "class": "informational",
+     "evaluated_on_valid_spec": true,
+     "positive": true,
+     "positive_basis": "evaluated on the valid specification",
+     "negative": false,
+     "unreachable": null
+    },
+    {
+     "rule": "wrf_startup_refusal",
+     "statuses": [
+      "DEFERRED",
+      "FAIL"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
+    },
+    {
+     "rule": "wrf_startup_rewrite",
+     "statuses": [
+      "FAIL",
+      "WARN"
+     ],
+     "class": "enforcing",
+     "evaluated_on_valid_spec": false,
+     "positive": true,
+     "positive_basis": "not raised on the valid specification",
+     "negative": true,
+     "unreachable": null
     }
    ]
   },
@@ -725,7 +820,7 @@
    ],
    "untested": []
   },
-  "faults_without_collateral": 24,
+  "faults_without_collateral": 11,
   "cfl_timestep_sweep": {
    "dx_values": 8,
    "statuses": [

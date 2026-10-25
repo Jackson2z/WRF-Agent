@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wrfagent"
-version = "0.2.0.dev0"
+version = "1.0.0"
 description = "Multi-agent WRF configuration: specialist deliberation, compile-checked specification, deterministic namelist generation, start-up check audit"
 readme = "README.md"
 license = {text = "MIT"}
